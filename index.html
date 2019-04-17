@@ -10,7 +10,17 @@
   </head>
   
   <body>
-    <div id="container1" style="position: relative; width: 80%; max-height: 450px;"></div>
+    <div class="flex-row-container">
+        <div id="container1" style="width: 60%; max-height: 600px;"></div>
+        <div class="flex-column-container">
+          <div>
+            <p id="countryName"></p>
+          </div>
+          <div id="container2" style="max-height: 300px;"></div>
+          <div id="container3" style="max-height: 300px;"></div>
+        </div>
+    </div>
+    
     <script src='index.js'></script>
   </body>
 </html>

@@ -1,0 +1,301 @@
+# University Ranking Results - www.universityrankings.ch
+# Ranking: Leiden
+# Year: 2014
+# Region: Europe
+#
+ #    World Rank                   ,  Institution                   ,  Country                       
+   19  ,  University of Cambridge  , UK    
+   21  ,  Swiss Federal Institute of Technology Lausanne - EPFL  , Switzerland    
+   22  ,  Weizmann Institute of Science  , Israel    
+   23  ,  London School of Hygiene & Tropical Medicine  , UK    
+   24  ,  University of Oxford  , UK    
+   25  ,  Swiss Federal Institute of Technology Zurich - ETHZ  , Switzerland    
+   33  ,  Imperial College London  , UK    
+   39  ,  University of St. Andrews  , UK    
+   41  ,  University College London  , UK    
+   45  ,  King&rsquo;s College London  , UK    
+   49  ,  University of Bristol  , UK    
+   52  ,  Queen Mary - University of London  , UK    
+   53  ,  University of Leiden  , Netherlands    
+   54  ,  University of Lausanne  , Switzerland    
+   56  ,  University of Geneva  , Switzerland    
+   57  ,  Ecole Normale Supérieure de Paris  , France    
+   58  ,  University of Exeter  , UK    
+   62  ,  University of Edinburgh  , UK    
+   63  ,  University of Basel  , Switzerland    
+   64  ,  VU University Amsterdam  , Netherlands    
+   65  ,  University of Dundee  , UK    
+   67  ,  University of Zurich  , Switzerland    
+   71  ,  Technical University of München  , Germany    
+   73  ,  Technical University of Denmark  , Denmark    
+   77  ,  Utrecht University  , Netherlands    
+   78  ,  University of York  , UK    
+   79  ,  University of Aberdeen  , UK    
+   80  ,  Trinity College Dublin  , Ireland    
+   81  ,  University of Amsterdam  , Netherlands    
+   83  ,  University of Warwick  , UK    
+   85  ,  Erasmus University Rotterdam  , Netherlands    
+   86  ,  University René Descartes (Paris V)  , France    
+   90  ,  University of Plymouth  , UK    
+   91  ,  University Denis Diderot (Paris VII)  , France    
+   92  ,  University of East Anglia  , UK    
+   93  ,  Wageningen University & Research Center  , Netherlands    
+   94  ,  Eindhoven University of Technology  , Netherlands    
+   97  ,  Radboud University of Nijmegen  , Netherlands    
+   102  ,  University of Twente  , Netherlands    
+   107  ,  University of Freiburg  , Germany    
+   108  ,  University of Durham  , UK    
+   110  ,  University of Maastricht  , Netherlands    
+   111  ,  University of München  , Germany    
+   114  ,  University Pierre et Marie Curie (Paris VI)  , France    
+   115  ,  Catholic University of Leuven  , Belgium    
+   116  ,  University of Münster  , Germany    
+   117  ,  University of Glasgow  , UK    
+   118  ,  University of Leeds  , UK    
+   120  ,  University of Groningen  , Netherlands    
+   121  ,  Newcastle University - Newcastle-upon-Tyne  , UK    
+   122  ,  University of Liverpool  , UK    
+   125  ,  Karolinska Institute  , Sweden    
+   127  ,  University Victor Segalen - Bordeaux II  , France    
+   128  ,  University of Copenhagen  , Denmark    
+   129  ,  University Paris Sud (Paris XI)  , France    
+   130  ,  University of Konstanz  , Germany    
+   131  ,  Aarhus University  , Denmark    
+   133  ,  University of Würzburg  , Germany    
+   135  ,  University of Nice-Sophia Antipolis  , France    
+   136  ,  University of Nottingham  , UK    
+   139  ,  University Joseph Fourier - Grenoble I  , France    
+   140  ,  Stockholm University  , Sweden    
+   141  ,  University of Sheffield  , UK    
+   144  ,  University of Montpellier II  , France    
+   148  ,  Delft University of Technology  , Netherlands    
+   150  ,  University of Graz  , Austria    
+   151  ,  Catholic University of Louvain  , Belgium    
+   152  ,  University of Regensburg  , Germany    
+   153  ,  University of Bonn  , Germany    
+   156  ,  University of Southampton  , UK    
+   157  ,  University Bordeaux I - Sciences Technologie  , France    
+   160  ,  University of Bern  , Switzerland    
+   161  ,  University of Manchester  , UK    
+   164  ,  University of Sussex  , UK    
+   166  ,  University of Göttingen  , Germany    
+   169  ,  University of Montpellier I  , France    
+   171  ,  Ecole Polytechnique  , France    
+   172  ,  University of Lancaster  , UK    
+   174  ,  University of Heidelberg  , Germany    
+   175  ,  University College Cork  , Ireland    
+   176  ,  University of Düsseldorf  , Germany    
+   179  ,  University of Birmingham  , UK    
+   180  ,  University Rovira I Virgili Tarragona  , Spain    
+   181  ,  University of Stuttgart  , Germany    
+   182  ,  Cardiff University  , UK    
+   184  ,  University of Strasbourg  , France    
+   186  ,  London School of Economics  , UK    
+   189  ,  University of Frankfurt am Main  , Germany    
+   192  ,  Free University of Berlin  , Germany    
+   193  ,  University of Trento  , Italy    
+   200  ,  Humboldt University of Berlin  , Germany    
+   201  ,  University of Hull  , UK    
+   203  ,  University of Reading  , UK    
+   204  ,  University of Marburg  , Germany    
+   205  ,  National University of Ireland - Galway  , Ireland    
+   210  ,  University of Bayreuth  , Germany    
+   211  ,  University of Hamburg  , Germany    
+   213  ,  Hebrew University of Jerusalem  , Israel    
+   215  ,  University of Kiel  , Germany    
+   216  ,  University of Barcelona  , Spain    
+   217  ,  Université Libre de Bruxelles  , Belgium    
+   218  ,  University of Leicester  , UK    
+   222  ,  University of Mainz  , Germany    
+   223  ,  University of Ulm  , Germany    
+   224  ,  Medical University of Vienna  , Austria    
+   225  ,  University of Cologne  , Germany    
+   229  ,  University of Erlangen-Nürnberg  , Germany    
+   230  ,  Göteborg University  , Sweden    
+   232  ,  RWTH Aachen University  , Germany    
+   233  ,  Karlsruhe Institute of Technology  , Germany    
+   234  ,  Brunel University  , UK    
+   237  ,  University of Southern Denmark  , Denmark    
+   239  ,  Technical University of Berlin  , Germany    
+   241  ,  University of Bath  , UK    
+   242  ,  University of Vienna  , Austria    
+   244  ,  University of Gent  , Belgium    
+   246  ,  University of Antwerp  , Belgium    
+   248  ,  University Claude Bernard - Lyon I  , France    
+   252  ,  Tilburg University  , Netherlands    
+   255  ,  Grenoble INP  , France    
+   256  ,  University Paris-Est Créteil Val de Marne  , France    
+   258  ,  Medical University of Innsbruck  , Austria    
+   262  ,  University of Lubeck  , Germany    
+   263  ,  University of Burgundy  , France    
+   265  ,  Lund University  , Sweden    
+   266  ,  University of Bochum  , Germany    
+   269  ,  University of Helsinki  , Finland    
+   271  ,  University of Innsbruck  , Austria    
+   274  ,  University Paul Sabatier - Toulouse III  , France    
+   275  ,  Aalborg University  , Denmark    
+   277  ,  Technical University of Dresden  , Germany    
+   279  ,  University of Duisburg-Essen  , Germany    
+   280  ,  University of Potsdam  , Germany    
+   281  ,  University of Jena  , Germany    
+   282  ,  Vienna University of Technology  , Austria    
+   287  ,  Hannover Medical School  , Germany    
+   288  ,  Aix-Marseille University  , France    
+   292  ,  Queen&rsquo;s University Belfast  , UK    
+   294  ,  University of Verona  , Italy    
+   295  ,  University of Hannover  , Germany    
+   297  ,  Uppsala University  , Sweden    
+   298  ,  University College Dublin  , Ireland    
+   303  ,  University of Rennes I  , France    
+   304  ,  University Lille I  , France    
+   310  ,  Chalmers University of Technology  , Sweden    
+   316  ,  University of Tübingen  , Germany    
+   317  ,  University of Oslo  , Norway    
+   318  ,  University of Tromso  , Norway    
+   319  ,  University of Greifswald  , Germany    
+   329  ,  University of Liège  , Belgium    
+   331  ,  Norwegian University of Science and Technology  , Norway    
+   333  ,  University of Crete  , Greece    
+   336  ,  University of Bielefeld  , Germany    
+   337  ,  Umea University  , Sweden    
+   339  ,  Technical University of Darmstadt  , Germany    
+   340  ,  University of Milan  , Italy    
+   341  ,  University of Perugia  , Italy    
+   344  ,  University of Milan - Bicocca  , Italy    
+   345  ,  Saarland University  , Germany    
+   346  ,  University of Kent at Canterbury  , UK    
+   348  ,  Aalto University  , Finland    
+   356  ,  University of Ferrara  , Italy    
+   357  ,  Vrije Universiteit Brussel  , Belgium    
+   360  ,  Cranfield University  , UK    
+   361  ,  University of Trieste  , Italy    
+   362  ,  Open University  , UK    
+   363  ,  KTH - Royal Institute of Technology  , Sweden    
+   366  ,  Swedish University of Agricultural Sciences  , Sweden    
+   368  ,  University of Leipzig  , Germany    
+   369  ,  Polytechnic University of Milan  , Italy    
+   371  ,  University of Pavia  , Italy    
+   375  ,  University of Florence  , Italy    
+   377  ,  University of Bergen  , Norway    
+   379  ,  University of Minho  , Portugal    
+   381  ,  University of Strathclyde  , UK    
+   382  ,  University of Brescia  , Italy    
+   383  ,  Polytechnic University of Valencia  , Spain    
+   384  ,  University of Turku  , Finland    
+   386  ,  Technical University of Braunschweig  , Germany    
+   390  ,  Linkoping University  , Sweden    
+   391  ,  Heriot-Watt University  , UK    
+   394  ,  Autonomous University of Madrid  , Spain    
+   395  ,  University of Córdoba  , Spain    
+   397  ,  Autonomous University of Barcelona  , Spain    
+   398  ,  Polytechnic University of Turin  , Italy    
+   399  ,  University of Surrey  , UK    
+   400  ,  University Carlos III de Madrid  , Spain    
+   401  ,  University of Vigo  , Spain    
+   402  ,  University of Eastern Finland  , Finland    
+   403  ,  University of Giessen  , Germany    
+   404  ,  New University of Lisbon  , Portugal    
+   405  ,  University of Rostock  , Germany    
+   407  ,  Technion - Israel Institute of Technology  , Israel    
+   408  ,  University of Salerno  , Italy    
+   412  ,  Loughborough University  , UK    
+   413  ,  University of Padua  , Italy    
+   419  ,  University of Bologna  , Italy    
+   422  ,  Graz University of Technology  , Austria    
+   428  ,  University of Valencia  , Spain    
+   430  ,  University of Parma  , Italy    
+   431  ,  University of Málaga  , Spain    
+   432  ,  University of Turin  , Italy    
+   433  ,  University of Lorraine  , France    
+   434  ,  University of Jyvaskyla  , Finland    
+   435  ,  Medical University of Graz  , Austria    
+   436  ,  University of Porto  , Portugal    
+   437  ,  University of Poitiers  , France    
+   440  ,  University of Bremen  , Germany    
+   441  ,  University of Santiago de Compostela  , Spain    
+   443  ,  Swansea University  , UK    
+   446  ,  University of Aveiro  , Portugal    
+   448  ,  University of Granada  , Spain    
+   450  ,  University of Ioannina  , Greece    
+   452  ,  Marche Polytechnic University  , Italy    
+   454  ,  National Technical University of Athens  , Greece    
+   455  ,  University of Navarra  , Spain    
+   458  ,  University of Magdeburg  , Germany    
+   459  ,  University of Halle-Wittenberg  , Germany    
+   463  ,  University of Zaragoza  , Spain    
+   473  ,  University of Alicante  , Spain    
+   474  ,  University of Pisa  , Italy    
+   475  ,  University of Oulu  , Finland    
+   476  ,  Technical University of Dortmund  , Germany    
+   482  ,  University of Tampere  , Finland    
+   485  ,  University of Nantes  , France    
+   486  ,  Second University of Naples  , Italy    
+   489  ,  Catholic University of the Sacred Heart  , Italy    
+   490  ,  Polytechnic University of Catalonia  , Spain    
+   493  ,  University of Seville  , Spain    
+   494  ,  University of Modena  , Italy    
+   496  ,  Complutense University of Madrid  , Spain    
+   498  ,  University of Catania  , Italy    
+   499  ,  Tel Aviv University  , Israel    
+   500  ,  University of Rome - La Sapienza  , Italy    
+   501  ,  Istanbul Technical University  , Turkey    
+   502  ,  University of Cantabria  , Spain    
+   503  ,  Bar-Ilan University  , Israel    
+   505  ,  University of Genoa  , Italy    
+   506  ,  Aristotle University of Thessaloniki  , Greece    
+   507  ,  University of Lisbon  , Portugal    
+   508  ,  University of Naples Federico II  , Italy    
+   511  ,  University of Tartu  , Estonia    
+   513  ,  University of Coimbra  , Portugal    
+   515  ,  University of Rome - Tor Vergata  , Italy    
+   523  ,  University of Reggio Calabria  , Italy    
+   530  ,  Technical University of Madrid  , Spain    
+   534  ,  University of the Basque Country  , Spain    
+   536  ,  University of Bari  , Italy    
+   539  ,  University of Franche-Comté  , France    
+   540  ,  Eötvös Lorand University  , Hungary    
+   541  ,  Semmelweis University  , Hungary    
+   544  ,  University of Ljubljana  , Slovenia    
+   545  ,  Ben-Gurion University of the Negev  , Israel    
+   548  ,  University of Athens  , Greece    
+   552  ,  University of Salamanca  , Spain    
+   555  ,  University of La Laguna  , Spain    
+   561  ,  Budapest University of Technology and Economics  , Hungary    
+   563  ,  University of Murcia  , Spain    
+   570  ,  Middle East Technical University  , Turkey    
+   582  ,  University of Palermo  , Italy    
+   583  ,  University of Messina  , Italy    
+   587  ,  University of Siena  , Italy    
+   588  ,  University of Patras  , Greece    
+   589  ,  University of Oviedo  , Spain    
+   591  ,  Erciyes University  , Turkey    
+   594  ,  University of Cagliari  , Italy    
+   596  ,  University of Warsaw  , Poland    
+   613  ,  University of Castilla La Mancha  , Spain    
+   623  ,  University of Haifa  , Israel    
+   624  ,  Wroclaw University of Technology  , Poland    
+   631  ,  Palacky University  , Czech Republic    
+   644  ,  University of Extremadura  , Spain    
+   653  ,  University of Valladolid  , Spain    
+   654  ,  Selcuk University  , Turkey    
+   655  ,  Nicolaus Copernicus University  , Poland    
+   659  ,  Masaryk University  , Czech Republic    
+   665  ,  Gazi University Ankara  , Turkey    
+   667  ,  Jagiellonian University  , Poland    
+   675  ,  Dokuz Eylul University  , Turkey    
+   693  ,  Charles University Prague  , Czech Republic    
+   697  ,  Moscow State University  , Russia    
+   698  ,  University of Debrecen   , Hungary    
+   699  ,  Comenius University in Bratislava  , Slovakia    
+   707  ,  University of Szeged  , Hungary    
+   712  ,  Warsaw University of Technology  , Poland    
+   716  ,  Hacettepe University  , Turkey    
+   718  ,  Ege University  , Turkey    
+   723  ,  University of Belgrade  , Serbia    
+   727  ,  AGH University of Science and Technology  , Poland    
+   728  ,  Ataturk University  , Turkey    
+   730  ,  University of Wroclaw  , Poland    
+   733  ,  University of Zagreb  , Croatia    
+   736  ,  Istanbul University  , Turkey    
+   741  ,  Adam Mickiewicz University in Poznan  , Poland    
+   750  ,  Ankara University  , Turkey    

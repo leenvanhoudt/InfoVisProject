@@ -1,0 +1,422 @@
+# University Ranking Results - www.universityrankings.ch
+# Ranking: Times
+# Year: 2017
+# Region: Europe
+#
+ #    World Rank                   ,  Institution                   ,  Country                       
+   1  ,  University of Oxford  , UK    
+   4  ,  University of Cambridge  , UK    
+   8  ,  Imperial College London  , UK    
+   9  ,  Swiss Federal Institute of Technology Zurich - ETHZ  , Switzerland    
+   15  ,  University College London  , UK    
+   25  ,  London School of Economics  , UK    
+   27  ,  University of Edinburgh  , UK    
+   28  ,  Karolinska Institute  , Sweden    
+   30  ,  Swiss Federal Institute of Technology Lausanne - EPFL  , Switzerland    
+   30  ,  University of München  , Germany    
+   36  ,  King&rsquo;s College London  , UK    
+   40  ,  Catholic University of Leuven  , Belgium    
+   43  ,  University of Heidelberg  , Germany    
+   46  ,  Technical University of München  , Germany    
+   55  ,  University of Manchester  , UK    
+   57  ,  Humboldt University of Berlin  , Germany    
+   59  ,  Delft University of Technology  , Netherlands    
+   63  ,  University of Amsterdam  , Netherlands    
+   65  ,  Wageningen University & Research Center  , Netherlands    
+   66  ,  Ecole Normale Supérieure de Paris  , France    
+   69  ,  Erasmus University Rotterdam  , Netherlands    
+   71  ,  University of Bristol  , UK    
+   75  ,  Free University of Berlin  , Germany    
+   77  ,  University of Leiden  , Netherlands    
+   78  ,  RWTH Aachen University  , Germany    
+   80  ,  University of Groningen  , Netherlands    
+   82  ,  Technical University of Berlin  , Germany    
+   82  ,  University of Warwick  , UK    
+   86  ,  Utrecht University  , Netherlands    
+   88  ,  University of Glasgow  , UK    
+   89  ,  University of Tübingen  , Germany    
+   91  ,  University of Helsinki  , Finland    
+   93  ,  Uppsala University  , Sweden    
+   94  ,  University of Maastricht  , Netherlands    
+   95  ,  University of Freiburg  , Germany    
+   96  ,  Lund University  , Sweden    
+   96  ,  University of Durham  , UK    
+   98  ,  University of Basel  , Switzerland    
+   98  ,  Aarhus University  , Denmark    
+   102  ,  University of Mannheim  , Germany    
+   106  ,  University of Zurich  , Switzerland    
+   109  ,  University of Sheffield  , UK    
+   110  ,  University of Bern  , Switzerland    
+   110  ,  University of St. Andrews  , UK    
+   112  ,  University of Göttingen  , Germany    
+   113  ,  University of Bonn  , Germany    
+   113  ,  Queen Mary - University of London  , UK    
+   116  ,  Ecole Polytechnique  , France    
+   118  ,  University of Gent  , Belgium    
+   120  ,  University of Copenhagen  , Denmark    
+   121  ,  University Pierre et Marie Curie (Paris VI)  , France    
+   121  ,  Radboud University of Nijmegen  , Netherlands    
+   121  ,  University of Southampton  , UK    
+   126  ,  University of Exeter  , UK    
+   128  ,  Catholic University of Louvain  , Belgium    
+   129  ,  University of York  , UK    
+   130  ,  University of Birmingham  , UK    
+   132  ,  University of Oslo  , Norway    
+   133  ,  University of Leeds  , UK    
+   135  ,  University of Ulm  , Germany    
+   137  ,  University of Geneva  , Switzerland    
+   137  ,  Scuola Normale Superiore di Pisa  , Italy    
+   137  ,  University of Lancaster  , UK    
+   144  ,  Stockholm University  , Sweden    
+   144  ,  Karlsruhe Institute of Technology  , Germany    
+   147  ,  University of Nottingham  , UK    
+   149  ,  University of Sussex  , UK    
+   151  ,  University of Lausanne  , Switzerland    
+   153  ,  University of Twente  , Netherlands    
+   156  ,  VU University Amsterdam  , Netherlands    
+   158  ,  University of Liverpool  , UK    
+   159  ,  KTH - Royal Institute of Technology  , Sweden    
+   160  ,  University of Erlangen-Nürnberg  , Germany    
+   161  ,  University of Vienna  , Austria    
+   161  ,  University of Münster  , Germany    
+   163  ,  Autonomous University of Barcelona  , Spain    
+   164  ,  Technical University of Dresden  , Germany    
+   165  ,  University of East Anglia  , UK    
+   170  ,  University of Cologne  , Germany    
+   170  ,  Göteborg University  , Sweden    
+   172  ,  University of Leicester  , UK    
+   173  ,  Royal Holloway - University of London  , UK    
+   175  ,  University Pompeu Fabra  , Spain    
+   176  ,  Technical University of Denmark  , Denmark    
+   177  ,  Eindhoven University of Technology  , Netherlands    
+   178  ,  University of Luxembourg  , Luxembourg    
+   179  ,  University Paris Sud (Paris XI)  , France    
+   180  ,  University of Hamburg  , Germany    
+   180  ,  University of Dundee  , UK    
+   182  ,  Cardiff University  , UK    
+   186  ,  University of Würzburg  , Germany    
+   186  ,  Hebrew University of Jerusalem  , Israel    
+   188  ,  Moscow State University  , Russia    
+   188  ,  University of Aberdeen  , UK    
+   190  ,  Sant’Anna School of Advanced Studies  , Italy    
+   190  ,  Newcastle University - Newcastle-upon-Tyne  , UK    
+   192  ,  University of Reading  , UK    
+   194  ,  University of Konstanz  , Germany    
+   197  ,  University of Duisburg-Essen  , Germany    
+   198  ,  Tilburg University  , Netherlands    
+   201-250  ,  University of Antwerp  , Belgium    
+   201-250  ,  Université Libre de Bruxelles  , Belgium    
+   201-250  ,  University of Kiel  , Germany    
+   201-250  ,  University of Frankfurt am Main  , Germany    
+   201-250  ,  Technical University of Darmstadt  , Germany    
+   201-250  ,  University of Stuttgart  , Germany    
+   201-250  ,  Aalborg University  , Denmark    
+   201-250  ,  University of Barcelona  , Spain    
+   201-250  ,  University of Oulu  , Finland    
+   201-250  ,  Ecole Normale Supérieure de Lyon  , France    
+   201-250  ,  University Denis Diderot (Paris VII)  , France    
+   201-250  ,  University René Descartes (Paris V)  , France    
+   201-250  ,  National University of Ireland - Galway  , Ireland    
+   201-250  ,  Royal College of Surgeons  , Ireland    
+   201-250  ,  University College Dublin  , Ireland    
+   201-250  ,  Tel Aviv University  , Israel    
+   201-250  ,  University of Iceland  , Iceland    
+   201-250  ,  Polytechnic University of Milan  , Italy    
+   201-250  ,  University of Bologna  , Italy    
+   201-250  ,  University of Trento  , Italy    
+   201-250  ,  University of Bergen  , Norway    
+   201-250  ,  Birkbeck - University of London  , UK    
+   201-250  ,  St George’s - University of London  , UK    
+   201-250  ,  Queen&rsquo;s University Belfast  , UK    
+   201-250  ,  Aalto University  , Finland    
+   201-250  ,  CentraleSupélec  , France    
+   251-300  ,  Vienna University of Technology  , Austria    
+   251-300  ,  University of Fribourg  , Switzerland    
+   251-300  ,  University of Mainz  , Germany    
+   251-300  ,  University of Marburg  , Germany    
+   251-300  ,  University of Bochum  , Germany    
+   251-300  ,  University of Bayreuth  , Germany    
+   251-300  ,  University of Bielefeld  , Germany    
+   251-300  ,  University of Hohenheim  , Germany    
+   251-300  ,  Copenhagen Business School  , Denmark    
+   251-300  ,  University of Southern Denmark  , Denmark    
+   251-300  ,  University of Tampere  , Finland    
+   251-300  ,  Mines ParisTech  , France    
+   251-300  ,  Free University of Bozen  , Italy    
+   251-300  ,  University of Rome - La Sapienza  , Italy    
+   251-300  ,  Norwegian University of Science and Technology  , Norway    
+   251-300  ,  Chalmers University of Technology  , Sweden    
+   251-300  ,  Swedish University of Agricultural Sciences  , Sweden    
+   251-300  ,  Umea University  , Sweden    
+   251-300  ,  Koc University  , Turkey    
+   251-300  ,  University of Bath  , UK    
+   251-300  ,  University of Surrey  , UK    
+   301-350  ,  University of Innsbruck  , Austria    
+   301-350  ,  University of Liège  , Belgium    
+   301-350  ,  Vrije Universiteit Brussel  , Belgium    
+   301-350  ,  University of Giessen  , Germany    
+   301-350  ,  University of Bremen  , Germany    
+   301-350  ,  University of Tartu  , Estonia    
+   301-350  ,  University of Navarra  , Spain    
+   301-350  ,  University of Turku  , Finland    
+   301-350  ,  University of Crete  , Greece    
+   301-350  ,  Central European University  , Hungary    
+   301-350  ,  Technion - Israel Institute of Technology  , Israel    
+   301-350  ,  University of Milan  , Italy    
+   301-350  ,  University of Padua  , Italy    
+   301-350  ,  University of Pavia  , Italy    
+   301-350  ,  Moscow Institute of Physics and Technology  , Russia    
+   301-350  ,  Linkoping University  , Sweden    
+   301-350  ,  Sabanci University  , Turkey    
+   301-350  ,  Brunel University  , UK    
+   301-350  ,  Goldsmiths College - University of London  , UK    
+   301-350  ,  Loughborough University  , UK    
+   301-350  ,  University of Essex  , UK    
+   301-350  ,  University of Kent at Canterbury  , UK    
+   301-350  ,  University of Stirling  , UK    
+   301-350  ,  Aberystwyth University  , UK    
+   301-350  ,  Bangor University  , UK    
+   301-350  ,  Swansea University  , UK    
+   301-350  ,  University of Strasbourg  , France    
+   301-350  ,  University of Bordeaux  , France    
+   301-350  ,  Aix-Marseille University  , France    
+   301-350  ,  Technical University of Dortmund  , Germany    
+   301-350  ,  Royal Veterinary College   , UK    
+   301-350  ,  Anglia Ruskin University  , UK    
+   301-350  ,  Federal University of Toulouse Midi-Pyrénées  , France    
+   351-400  ,  Graz University of Technology  , Austria    
+   351-400  ,  University of Hannover  , Germany    
+   351-400  ,  Kaiserslautern University of Technology  , Germany    
+   351-400  ,  Autonomous University of Madrid  , Spain    
+   351-400  ,  University Claude Bernard - Lyon I  , France    
+   351-400  ,  University Paris-Sorbonne (Paris IV)  , France    
+   351-400  ,  National University of Ireland - Maynooth  , Ireland    
+   351-400  ,  University College Cork  , Ireland    
+   351-400  ,  Polytechnic University of Turin  , Italy    
+   351-400  ,  University of Calabria  , Italy    
+   351-400  ,  University of Milan - Bicocca  , Italy    
+   351-400  ,  University of Salerno  , Italy    
+   351-400  ,  University of Trieste  , Italy    
+   351-400  ,  University of Turin  , Italy    
+   351-400  ,  Norwegian University of Life Sciences  , Norway    
+   351-400  ,  Bilkent University  , Turkey    
+   351-400  ,  Aston University  , UK    
+   351-400  ,  City University London  , UK    
+   351-400  ,  University of Plymouth  , UK    
+   351-400  ,  University of Eastern Finland  , Finland    
+   351-400  ,  Ecole des Ponts ParisTech  , France    
+   351-400  ,  ITMO University  , Russia    
+   351-400  ,  University of Montpellier  , France    
+   351-400  ,  Örebro University  , Sweden    
+   401-500  ,  University of Linz  , Austria    
+   401-500  ,  University of Graz  , Austria    
+   401-500  ,  Hasselt University  , Belgium    
+   401-500  ,  University of Neuchatel  , Switzerland    
+   401-500  ,  University of St.Gallen  , Switzerland    
+   401-500  ,  Charles University Prague  , Czech Republic    
+   401-500  ,  University of Greifswald  , Germany    
+   401-500  ,  University of Siegen  , Germany    
+   401-500  ,  Polytechnic University of Catalonia  , Spain    
+   401-500  ,  University Rovira I Virgili Tarragona  , Spain    
+   401-500  ,  Ecole Normale Supérieure de Cachan  , France    
+   401-500  ,  University Panthéon-Sorbonne (Paris I)  , France    
+   401-500  ,  University of Nantes  , France    
+   401-500  ,  University of Nice-Sophia Antipolis  , France    
+   401-500  ,  Aristotle University of Thessaloniki  , Greece    
+   401-500  ,  Dublin City University  , Ireland    
+   401-500  ,  Bar-Ilan University  , Israel    
+   401-500  ,  Roma Tre University  , Italy    
+   401-500  ,  University of Bari  , Italy    
+   401-500  ,  University of Bergamo  , Italy    
+   401-500  ,  University of Brescia  , Italy    
+   401-500  ,  University of Ferrara  , Italy    
+   401-500  ,  University of Florence  , Italy    
+   401-500  ,  University of Genoa  , Italy    
+   401-500  ,  University of Salento  , Italy    
+   401-500  ,  University of Modena  , Italy    
+   401-500  ,  University of Naples Federico II  , Italy    
+   401-500  ,  University of Pisa  , Italy    
+   401-500  ,  University of Rome - Tor Vergata  , Italy    
+   401-500  ,  University of Verona  , Italy    
+   401-500  ,  University of Aveiro  , Portugal    
+   401-500  ,  University of Coimbra  , Portugal    
+   401-500  ,  University of Lisbon  , Portugal    
+   401-500  ,  University of Porto  , Portugal    
+   401-500  ,  Higher School of Economics  , Russia    
+   401-500  ,  Novosibirsk State University  , Russia    
+   401-500  ,  St. Petersburg State University  , Russia    
+   401-500  ,  Atilim University  , Turkey    
+   401-500  ,  Bogazici University  , Turkey    
+   401-500  ,  Heriot-Watt University  , UK    
+   401-500  ,  Keele University  , UK    
+   401-500  ,  Open University  , UK    
+   401-500  ,  Oxford Brookes University  , UK    
+   401-500  ,  School of Oriental and African Studies - University of London  , UK    
+   401-500  ,  University of Portsmouth  , UK    
+   401-500  ,  University of Strathclyde  , UK    
+   401-500  ,  University of Jyvaskyla  , Finland    
+   401-500  ,  National Research Nuclear University  , Russia    
+   401-500  ,  Marche Polytechnic University  , Italy    
+   401-500  ,  Uit the Arctic University of Norway  , Norway    
+   401-500  ,  Kazan Federal University   , Russia    
+   401-500  ,  University of Lille  , France    
+   501-600  ,  University of Magdeburg  , Germany    
+   501-600  ,  University of Paderborn  , Germany    
+   501-600  ,  Roskilde University  , Denmark    
+   501-600  ,  Complutense University of Madrid  , Spain    
+   501-600  ,  Polytechnic University of Valencia  , Spain    
+   501-600  ,  University of Granada  , Spain    
+   501-600  ,  University of Valencia  , Spain    
+   501-600  ,  University of Zaragoza  , Spain    
+   501-600  ,  University of the Basque Country  , Spain    
+   501-600  ,  Lappeenranta University of Technology  , Finland    
+   501-600  ,  Tampere University of Technology  , Finland    
+   501-600  ,  Institut National des Sciences Appliquées de Lyon  , France    
+   501-600  ,  University of Rennes I  , France    
+   501-600  ,  University of Franche-Comté  , France    
+   501-600  ,  Athens University of Economics and Business  , Greece    
+   501-600  ,  University of Athens  , Greece    
+   501-600  ,  University of Ioannina  , Greece    
+   501-600  ,  Semmelweis University  , Hungary    
+   501-600  ,  University of Limerick  , Ireland    
+   501-600  ,  Ben-Gurion University of the Negev  , Israel    
+   501-600  ,  Catholic University of the Sacred Heart  , Italy    
+   501-600  ,  University of Cagliari  , Italy    
+   501-600  ,  University of Catania  , Italy    
+   501-600  ,  University of Palermo  , Italy    
+   501-600  ,  University of Parma  , Italy    
+   501-600  ,  University of Siena  , Italy    
+   501-600  ,  University of Urbino  , Italy    
+   501-600  ,  Warsaw University of Technology  , Poland    
+   501-600  ,  University of Warsaw  , Poland    
+   501-600  ,  New University of Lisbon  , Portugal    
+   501-600  ,  University of Minho  , Portugal    
+   501-600  ,  Tomsk Polytechnic University  , Russia    
+   501-600  ,  Tomsk State University  , Russia    
+   501-600  ,  University of Maribor  , Slovenia    
+   501-600  ,  Istanbul Technical University  , Turkey    
+   501-600  ,  Liverpool John Moores University  , UK    
+   501-600  ,  Middlesex University  , UK    
+   501-600  ,  University of Hertfordshire  , UK    
+   501-600  ,  University of Hull  , UK    
+   501-600  ,  University of Ulster  , UK    
+   501-600  ,  Ca Foscari University of Venice  , Italy    
+   601-800  ,  Eastern Mediterranean University  , Turkey    
+   601-800  ,  Czech Technical University of Prague  , Czech Republic    
+   601-800  ,  Masaryk University  , Czech Republic    
+   601-800  ,  Palacky University  , Czech Republic    
+   601-800  ,  Brno University of Technology  , Czech Republic    
+   601-800  ,  University Carlos III de Madrid  , Spain    
+   601-800  ,  Technical University of Madrid  , Spain    
+   601-800  ,  University Rey Juan Carlos  , Spain    
+   601-800  ,  University of Alcalá de Henares  , Spain    
+   601-800  ,  University of Castilla La Mancha  , Spain    
+   601-800  ,  University of Jaén  , Spain    
+   601-800  ,  University of La Coruña  , Spain    
+   601-800  ,  University of La Laguna  , Spain    
+   601-800  ,  University of Murcia  , Spain    
+   601-800  ,  University of Oviedo  , Spain    
+   601-800  ,  University of Salamanca  , Spain    
+   601-800  ,  University of Santiago de Compostela  , Spain    
+   601-800  ,  University of Seville  , Spain    
+   601-800  ,  University of Vigo  , Spain    
+   601-800  ,  Ecole Centrale de Lyon  , France    
+   601-800  ,  University of Patras  , Greece    
+   601-800  ,  Eötvös Lorand University  , Hungary    
+   601-800  ,  Budapest University of Technology and Economics  , Hungary    
+   601-800  ,  University of Pecs  , Hungary    
+   601-800  ,  University of Szeged  , Hungary    
+   601-800  ,  Dublin Institute of Technology  , Ireland    
+   601-800  ,  University of Haifa  , Israel    
+   601-800  ,  Vilnius University  , Lithuania    
+   601-800  ,  Jagiellonian University  , Poland    
+   601-800  ,  AGH University of Science and Technology  , Poland    
+   601-800  ,  University of Beira Interior  , Portugal    
+   601-800  ,  Babes-Bolyai University  , Romania    
+   601-800  ,  West University of Timisoara  , Romania    
+   601-800  ,  Bauman Moscow State Technical University  , Russia    
+   601-800  ,  University of Ljubljana  , Slovenia    
+   601-800  ,  Comenius University in Bratislava  , Slovakia    
+   601-800  ,  Hacettepe University  , Turkey    
+   601-800  ,  Istanbul University  , Turkey    
+   601-800  ,  Izmir Institute of Technology  , Turkey    
+   601-800  ,  Middle East Technical University  , Turkey    
+   601-800  ,  TOBB Economics and Technology University  , Turkey    
+   601-800  ,  Bournemouth University  , UK    
+   601-800  ,  Coventry University  , UK    
+   601-800  ,  De Montfort University Leicester  , UK    
+   601-800  ,  Glasgow Caledonian University  , UK    
+   601-800  ,  Kingston University  , UK    
+   601-800  ,  London Metropolitan University  , UK    
+   601-800  ,  Edinburgh Napier University  , UK    
+   601-800  ,  Nottingham Trent University  , UK    
+   601-800  ,  Roehampton University of Surrey  , UK    
+   601-800  ,  The Manchester Metropolitan University  , UK    
+   601-800  ,  University of Bradford  , UK    
+   601-800  ,  University of Brighton  , UK    
+   601-800  ,  University of Central Lancashire  , UK    
+   601-800  ,  University of East London  , UK    
+   601-800  ,  University of Greenwich  , UK    
+   601-800  ,  University of Huddersfield  , UK    
+   601-800  ,  University of Northumbria at Newcastle  , UK    
+   601-800  ,  University of Salford  , UK    
+   601-800  ,  University of Teesside  , UK    
+   601-800  ,  University of Westminster  , UK    
+   601-800  ,  University of the West of England - Bristol  , UK    
+   601-800  ,  St Petersburg State Politecnical University  , Russia    
+   601-800  ,  Tallinn University of Technology  , Estonia    
+   601-800  ,  University of Chemistry and Technology - Prague  , Czech Republic    
+   601-800  ,  ISCTE-University Institute of Lisbon  , Portugal    
+   601-800  ,  Leeds Beckett University  , UK    
+   601-800  ,  University of Lincoln (England)  , UK    
+   601-800  ,  University of Bedfordshire  , UK    
+   601-800  ,  University of the West Scotland  , UK    
+   801  ,  Sofia University  , Bulgaria    
+   801  ,  Belarusian State University  , Belarus    
+   801  ,  Technical University of Liberec  , Czech Republic    
+   801  ,  Technical University of Ostrava  , Czech Republic    
+   801  ,  Tomas Bata University in Zlin  , Czech Republic    
+   801  ,  University of Pardubice  , Czech Republic    
+   801  ,  University of West Bohemia  , Czech Republic    
+   801  ,  University of Cergy-Pontoise  , France    
+   801  ,  University of Zagreb  , Croatia    
+   801  ,  University of Debrecen   , Hungary    
+   801  ,  Kaunas University of Technology  , Lithuania    
+   801  ,  Riga Technical University  , Latvia    
+   801  ,  University of Latvia  , Latvia    
+   801  ,  Adam Mickiewicz University in Poznan  , Poland    
+   801  ,  Nicolaus Copernicus University  , Poland    
+   801  ,  University of Lodz  , Poland    
+   801  ,  University of Silesia  , Poland    
+   801  ,  University of Bucharest  , Romania    
+   801  ,  I.M. Sechenov First Moscow State Medical University  , Russia    
+   801  ,  Novosibirsk State Technical University  , Russia    
+   801  ,  Peoples’ Friendship University of Russia  , Russia    
+   801  ,  Samara State Aerospace University  , Russia    
+   801  ,  Voronezh State University  , Russia    
+   801  ,  Slovak University of Technology  , Slovakia    
+   801  ,  Anadolu University  , Turkey    
+   801  ,  Ankara University  , Turkey    
+   801  ,  Erciyes University  , Turkey    
+   801  ,  Gazi University Ankara  , Turkey    
+   801  ,  Marmara University  , Turkey    
+   801  ,  Yildiz Technical University  , Turkey    
+   801  ,  National Technical University of Ukraine  , Ukraine    
+   801  ,  Sheffield Hallam University  , UK    
+   801  ,  The Robert Gordon University  , UK    
+   801  ,  University of Belgrade  , Serbia    
+   801  ,  Taras Shevchenko National University of Kyiv  , Ukraine    
+   801  ,  Ural Federal University  , Russia    
+   801  ,  V.N. Karazin Kharkiv National University  , Ukraine    
+   801  ,  Gdañsk University of Technology  , Poland    
+   801  ,  Alexandru Ioan Cuza University   , Romania    
+   801  ,  National University of Science and Technology MISiS  , Russia    
+   801  ,  Southern Federal University  , Russia    
+   801  ,  Czech University of Life Sciences Prague  , Czech Republic    
+   801  ,  Lobachevsky University  , Russia    
+   801  ,  London South Bank University  , UK    
+   801  ,  Lviv Polytechnic National University  , Ukraine    
+   801  ,  National Research Saratov State University  , Russia    
+   801  ,  National Research University of Electronic Technology  , Russia    
+   801  ,  Siberian Federal University  , Russia    
+   801  ,  Ivane Javakhishvili Tbilisi State University  , Georgia    
