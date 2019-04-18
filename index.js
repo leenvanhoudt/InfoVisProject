@@ -1,11 +1,10 @@
 //map config
-var map = new Datamap({
-  //scope: 'world',
+var overviewMap = new Datamap({
   element: document.getElementById('container1'),
   //set projection to Europe
   setProjection: function(element, options) { 
     var projection = d3.geo.mercator()
-      .center([20, 52])
+      .center([10, 52])
       .scale(800)
       .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
     var path = d3.geo.path()
@@ -19,7 +18,6 @@ var map = new Datamap({
           var countryData = data.find(obj => {
             return obj.name === geography.properties.name
           })
-          //resetZoom(zoomedMap);
           zoomToCountry(zoomedMap,countryData.latlng);
         });
     });
@@ -37,13 +35,12 @@ var map = new Datamap({
 
 //zoomed map config
 var zoomedMap = new Datamap({
-  //scope: 'world',
   element: document.getElementById('container2'),
   //set projection to Europe
   setProjection: function(element, options) { 
     var projection = d3.geo.mercator()
-      .center([10, 52])
-      .scale(800)
+      .center([4.7, 50.87])
+      .scale(1200)
       .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
     var path = d3.geo.path()
       .projection(projection);                 
@@ -61,11 +58,29 @@ var zoomedMap = new Datamap({
 });
 
 function zoomToCountry(map,coordinates){
-  //TODO
-  latitude = coordinates[0];
-  longitude = coordinates[1];
-  //map.projection.center([coordinates[0],coordinates[1]]);
-  //map.svg.selectAll(".datamaps-subunits").transition().duration(750).attr("transform", "scale(1.5)translate("+coordinates[0]+","+coordinates[1]+")");
+  $("#container2").empty();
+  new Datamap({
+    //scope: 'world',
+    element: document.getElementById('container2'),
+    //set projection to Europe
+    setProjection: function(element, options) { 
+      var projection = d3.geo.mercator()
+        .center([coordinates[1], coordinates[0]])
+        .scale(1200)
+        .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
+      var path = d3.geo.path()
+        .projection(projection);                 
+     return {path: path, projection: projection};
+    },
+    height: 300,
+    fills: {
+      defaultFill: '#f0af0a',
+      belgium: 'rgba(0,244,244,0.9)',
+    },
+    data: {
+      BEL: {fillKey: 'belgium' },     
+    }
+  });
 }
 
 function resetZoom(map){
@@ -73,7 +88,7 @@ function resetZoom(map){
 }
 
 //arcs
-map.arc([
+overviewMap.arc([
  {
   origin: {
       latitude: 50.87,
@@ -97,7 +112,7 @@ map.arc([
 ], {strokeWidth: 2});
 
 //bubbles, custom popup on hover template
-map.bubbles([
+overviewMap.bubbles([
  {name: 'Hot', latitude: 21.32, longitude: 5.32, radius: 10, fillKey: 'gt50'},
  {name: 'Chilly', latitude: -25.32, longitude: 120.32, radius: 18, fillKey: 'lt50'},
  {name: 'Hot again', latitude: 21.32, longitude: -84.32, radius: 8, fillKey: 'gt50'},
