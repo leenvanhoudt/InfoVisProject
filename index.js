@@ -1,3 +1,13 @@
+//erasmusdata 2010: per land -> per universiteit het aantal studenten
+d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
+var studentCountPerUniversityPerCountry = d3.nest()
+  .key(function(d) { return d.land; })
+  .key(function(d) { return d.universiteit; })
+  .rollup(function(leaves) { return leaves.length;})
+  .entries(csv_data);
+  console.log(JSON.stringify(studentCountPerUniversityPerCountry));
+});
+
 //map config
 var overviewMap = new Datamap({
   element: document.getElementById('container1'),
@@ -81,10 +91,6 @@ function zoomToCountry(map,coordinates){
       BEL: {fillKey: 'belgium' },     
     }
   });
-}
-
-function resetZoom(map){
-  map.svg.selectAll(".datamaps-subunits").transition().duration(750).attr("transform", d3.zoomIdentity);
 }
 
 //arcs
