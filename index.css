@@ -9,3 +9,8 @@ div.flex-column-container {
   flex-direction: column;
   justify-content: space-between;
 }
+
+p.title {
+  color: #f0af0a;
+  font-weight: bold;
+}

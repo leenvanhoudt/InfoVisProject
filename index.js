@@ -19,7 +19,7 @@ var overviewMap = new Datamap({
           var countryData = data.find(obj => {
             return obj.name === geography.properties.name
           })
-          zoomToCountry(zoomedMap,countryData.latlng);
+          zoomToCountry(geography.properties.name,countryData.latlng);
         });
     });
   },
@@ -58,7 +58,6 @@ var myColor = d3.scaleSequential()
       });
     return myColor(studentCountPerCountry[0].values)},
 });
-}
 
 //zoomed map config
 var zoomedMap = new Datamap({
@@ -84,9 +83,9 @@ var zoomedMap = new Datamap({
   }
 });
 
-function zoomToCountry(map,coordinates){
+function zoomToCountry(country,coordinates){
   $("#container2").empty();
-  new Datamap({
+  var zoomed = new Datamap({
     //scope: 'world',
     element: document.getElementById('container2'),
     //set projection to Europe
@@ -107,6 +106,31 @@ function zoomToCountry(map,coordinates){
     data: {
       BEL: {fillKey: 'belgium' },
     }
+  });
+  bubbles = [];
+  d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
+    var studentCount = d3.nest()
+      .key(function(d) { return d.land; })
+      .key(function(d) { return d.universiteit; })
+      .rollup(function(leaves) { return leaves.length;})
+      .entries(csv_data);
+    var countryStudentCount = studentCount.find(obj => {
+      return obj.key === country;
+    }).values;
+    d3.json("Datasets/countries.json", function(data) {
+      var countryData = data.find(obj => {
+        return obj.name === country;
+      })
+      for(i=0;i<countryStudentCount.length;i++){
+        var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
+        bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'gt50'});
+      }
+      zoomed.bubbles(bubbles, {
+      popupTemplate: function(geo, data) {
+        return "<div class='hoverinfo'>" + data.name + "</div>";
+      }
+     });
+    })
   });
 }
 
@@ -134,14 +158,17 @@ overviewMap.arc([
 }
 ], {strokeWidth: 2});
 
-//bubbles, custom popup on hover template
-overviewMap.bubbles([
- {name: 'Hot', latitude: 21.32, longitude: 5.32, radius: 10, fillKey: 'gt50'},
- {name: 'Chilly', latitude: -25.32, longitude: 120.32, radius: 18, fillKey: 'lt50'},
- {name: 'Hot again', latitude: 21.32, longitude: -84.32, radius: 8, fillKey: 'gt50'},
+function getRandomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
 
-], {
- popupTemplate: function(geo, data) {
-   return "<div class='hoverinfo'>It is " + data.name + "</div>";
- }
-});
+function getRandomCoordinates(xCenter, yCenter, maxRadius){
+  var angle = Math.random()*Math.PI*2;
+  var radius = getRandomInteger(0,maxRadius);
+  var x = xCenter + Math.cos(angle)*radius;
+  var y = yCenter + Math.sin(angle)*radius;
+  return [x,y];
+}
+
+
+
