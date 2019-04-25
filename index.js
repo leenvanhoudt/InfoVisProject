@@ -21,7 +21,7 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
 
   countries.forEach(function(country){
     if (Object.keys(studentCountPerCountry).includes(country.properties.name)){
-      var iso = '"' + country.id + '"';
+      var iso = country.id;
       var value = studentCountPerCountry[country.properties.name];
       dataset[iso] = {fillColor: paletteScale(value), numberOfStudents: value};
     }
