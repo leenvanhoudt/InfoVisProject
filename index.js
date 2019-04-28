@@ -1,9 +1,10 @@
-d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
+d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
 
   var studentCountPerCountry = d3.nest()
-    .key(function(d) { return d.land; })
+    .key(function(d) { return d.Land; })
     .rollup(function(leaves) { return leaves.length;})
     .map(csv_data);
+  console.log(studentCountPerCountry);
 
   // Build color scale
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {return studentCountPerCountry[key]});
@@ -18,7 +19,7 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
               //.range(["#EFEFFF","#02386F"]); // blue color
 
   var dataset = {};
-  var fills = {defaultFill: '#F6f6f6f6', BEL: 'rgba(0,244,244,0.9)'};
+  var fills = {defaultFill: '#F5F5F5', Belgium: 'rgba(0,244,244,0.9)'};
   var countries = Datamap.prototype.worldTopo.objects.world.geometries;
 
   countries.forEach(function(country){
@@ -26,10 +27,10 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
       var iso = country.id;
       var value = studentCountPerCountry[country.properties.name];
       fills[iso] = paletteScale(value);
-      dataset[iso] = {fillKey: iso};//, numberOfStudents: value};
+      dataset[iso] = {fillKey: iso, numberOfStudents: value};
     }
   });
-  dataset['BEL'] = {fillKey: 'BEL'};
+  dataset['BEL'].fillKey = 'Belgium';
 
   //map config
   var overviewMap = new Datamap({
@@ -57,7 +58,27 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
     },
     height: 600,
     fills: fills,
-    data: dataset
+    data: dataset,
+    geographyConfig: {
+            borderColor: '#DEDEDE',
+            highlightBorderWidth: 3,
+            // don't change color on mouse hover
+            highlightFillColor: function(geo) {
+              return fills[geo.id] || '#F5F5F5';
+            },
+            // only change border
+            highlightBorderColor: '#B7B7B7',
+            // show desired information in tooltip
+            popupTemplate: function(geo, data) {
+                // don't show tooltip if country don't present in dataset
+                if (!data) { return ; }
+                // tooltip content
+                return ['<div class="hoverinfo">',
+                    '<strong>', geo.properties.name, '</strong>',
+                    '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+                    '</div>'].join('');
+            }
+        }
   });
 
   //zoomed map config
