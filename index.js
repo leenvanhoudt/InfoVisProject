@@ -122,10 +122,10 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
 
     bubbles = [];
-    d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
+    d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
       var studentCount = d3.nest()
-        .key(function(d) { return d.land; })
-        .key(function(d) { return d.universiteit; })
+        .key(function(d) { return d.Land; })
+        .key(function(d) { return d.Uitwisselingsinstelling; })
         .rollup(function(leaves) { return leaves.length;})
         .entries(csv_data);
       var countryStudentCount = studentCount.find(obj => {
