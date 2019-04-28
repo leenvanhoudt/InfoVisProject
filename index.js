@@ -24,7 +24,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   countries.forEach(function(country){
     if (Object.keys(studentCountPerCountry).includes(country.properties.name)){
-      var iso = country.id;
+      var iso = country.properties.iso;
       var value = studentCountPerCountry[country.properties.name];
       fills[iso] = paletteScale(value);
       dataset[iso] = {fillKey: iso, numberOfStudents: value};
@@ -65,7 +65,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
             highlightBorderWidth: 3,
             // don't change color on mouse hover
             highlightFillColor: function(geo) {
-              return fills[geo.id] || '#F5F5F5';
+              return fills[geo.fillKey] || '#F5F5F5';
             },
             // only change border
             highlightBorderColor: '#B7B7B7',
