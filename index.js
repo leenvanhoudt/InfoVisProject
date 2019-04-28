@@ -9,6 +9,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {return studentCountPerCountry[key]});
   var minValue = Math.min.apply(null, studentValues);
   var maxValue = Math.max.apply(null, studentValues);
+
   var paletteScale = d3v5.scaleSequential()
     .interpolator(d3v5.interpolateOrRd)
     .domain([minValue,maxValue]);
