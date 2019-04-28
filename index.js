@@ -4,19 +4,18 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     .key(function(d) { return d.Land; })
     .rollup(function(leaves) { return leaves.length;})
     .map(csv_data);
-  console.log(studentCountPerCountry);
 
   // Build color scale
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {return studentCountPerCountry[key]});
   var minValue = Math.min.apply(null, studentValues);
   var maxValue = Math.max.apply(null, studentValues);
-  var myColor = d3.scaleSequential()
-    .interpolator(d3.interpolateViridis)
+  var paletteScale = d3v5.scaleSequential()
+    .interpolator(d3v5.interpolateOrRd)
     .domain([minValue,maxValue]);
-  var paletteScale = d3.scale.linear()
-              .domain([minValue,maxValue])
-              .range(['#f1ead7','#f0af0a']); // orange color
-              //.range(["#EFEFFF","#02386F"]); // blue color
+  // var paletteScale = d3.scale.linear()
+  //             .domain([minValue,maxValue])
+  //             .range(['#f1ead7','#f0af0a']); // orange color
+  //             //.range(["#EFEFFF","#02386F"]); // blue color
 
   var dataset = {};
   var fills = {defaultFill: '#F5F5F5', Belgium: 'rgba(0,244,244,0.9)'};
@@ -31,6 +30,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     }
   });
   dataset['BEL'].fillKey = 'Belgium';
+  fills['BEL'] = 'Belgium';
 
   //map config
   var overviewMap = new Datamap({
