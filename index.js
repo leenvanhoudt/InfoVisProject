@@ -14,19 +14,22 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
     .domain([minValue,maxValue]);
   var paletteScale = d3.scale.linear()
               .domain([minValue,maxValue])
-              .range(["#EFEFFF","#02386F"]); // blue color
+              .range(['#f1ead7','#f0af0a']); // orange color
+              //.range(["#EFEFFF","#02386F"]); // blue color
 
   var dataset = {};
+  var fills = {defaultFill: '#F6f6f6f6', BEL: 'rgba(0,244,244,0.9)'};
   var countries = Datamap.prototype.worldTopo.objects.world.geometries;
 
   countries.forEach(function(country){
     if (Object.keys(studentCountPerCountry).includes(country.properties.name)){
       var iso = country.id;
       var value = studentCountPerCountry[country.properties.name];
-      dataset[iso] = {fillColor: paletteScale(value), numberOfStudents: value};
+      fills[iso] = paletteScale(value);
+      dataset[iso] = {fillKey: iso};//, numberOfStudents: value};
     }
-  })
-  console.log(dataset);
+  });
+  dataset['BEL'] = {fillKey: 'BEL'};
 
   //map config
   var overviewMap = new Datamap({
@@ -53,89 +56,78 @@ d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
       });
     },
     height: 600,
-    fills: {
-      defaultFill: '#F6f6f6f6',
-    },
+    fills: fills,
     data: dataset
   });
-});
 
-//zoomed map config
-var zoomedMap = new Datamap({
-  element: document.getElementById('container2'),
-  //set projection to Europe
-  setProjection: function(element, options) {
-    var projection = d3.geo.mercator()
-      .center([4.7, 50.87])
-      .scale(1200)
-      .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
-    var path = d3.geo.path()
-      .projection(projection);
-   return {path: path, projection: projection};
-  },
-  height: 300,
-  fills: {
-    defaultFill: '#f0af0a',
-    belgium: 'rgba(0,244,244,0.9)',
-    selectedCountry: 'red',
-  },
-  data: {
-    BEL: {fillKey: 'belgium' },
-  }
-});
-
-function zoomToCountry(country,coordinates){
-  $("#container2").empty();
-  var zoomed = new Datamap({
-    //scope: 'world',
+  //zoomed map config
+  var zoomedMap = new Datamap({
     element: document.getElementById('container2'),
     //set projection to Europe
     setProjection: function(element, options) {
       var projection = d3.geo.mercator()
-        .center([coordinates[1], coordinates[0]])
+        .center([4.7, 50.87])
         .scale(1200)
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
         .projection(projection);
-     return {path: path, projection: projection};
+    return {path: path, projection: projection};
     },
     height: 300,
-    fills: {
-      defaultFill: '#f0af0a',
-      belgium: 'rgba(0,244,244,0.9)',
-    },
-    data: {
-      BEL: {fillKey: 'belgium' },
-    }
+    fills: fills,
+    data: dataset
   });
 
+  function zoomToCountry(country,coordinates){
+    $("#container2").empty();
+    var zoomed = new Datamap({
+      //scope: 'world',
+      element: document.getElementById('container2'),
+      //set projection to Europe
+      setProjection: function(element, options) {
+        var projection = d3.geo.mercator()
+          .center([coordinates[1], coordinates[0]])
+          .scale(1200)
+          .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
+        var path = d3.geo.path()
+          .projection(projection);
+      return {path: path, projection: projection};
+      },
+      height: 300,
+      fills: fills,
+      data: dataset
+    });
 
-  bubbles = [];
-  d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
-    var studentCount = d3.nest()
-      .key(function(d) { return d.land; })
-      .key(function(d) { return d.universiteit; })
-      .rollup(function(leaves) { return leaves.length;})
-      .entries(csv_data);
-    var countryStudentCount = studentCount.find(obj => {
-      return obj.key === country;
-    }).values;
-    d3.json("Datasets/countries.json", function(data) {
-      var countryData = data.find(obj => {
-        return obj.name === country;
+
+    bubbles = [];
+    d3.csv("Datasets/testdata2010.csv", function(error, csv_data) {
+      var studentCount = d3.nest()
+        .key(function(d) { return d.land; })
+        .key(function(d) { return d.universiteit; })
+        .rollup(function(leaves) { return leaves.length;})
+        .entries(csv_data);
+      var countryStudentCount = studentCount.find(obj => {
+        return obj.key === country;
+      }).values;
+      d3.json("Datasets/countries.json", function(data) {
+        var countryData = data.find(obj => {
+          return obj.name === country;
+        })
+        for(i=0;i<countryStudentCount.length;i++){
+          var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
+          bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
+        }
+        zoomed.bubbles(bubbles, {
+        popupTemplate: function(geo, data) {
+          return "<div class='hoverinfo'>" + data.name + "</div>";
+        }
+      });
       })
-      for(i=0;i<countryStudentCount.length;i++){
-        var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
-        bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'gt50'});
-      }
-      zoomed.bubbles(bubbles, {
-      popupTemplate: function(geo, data) {
-        return "<div class='hoverinfo'>" + data.name + "</div>";
-      }
-     });
-    })
-  });
-}
+    });
+  };
+});
+
+
 function getRandomInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
