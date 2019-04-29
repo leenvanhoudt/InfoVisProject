@@ -5,6 +5,11 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     .rollup(function(leaves) { return leaves.length;})
     .map(csv_data);
 
+  let cf1 = crossfilter(studentCountPerCountry);
+  let studentCountByStart = cf1.dimension(student => student.Begin);
+  let cf2 = crossfilter(studentCountByStart);
+  let studentCountBetween = cf2.dimension(student => student.Eind);
+
   // Build color scale
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {return studentCountPerCountry[key]});
   var minValue = Math.min.apply(null, studentValues);
