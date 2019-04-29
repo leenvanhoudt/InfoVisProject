@@ -102,10 +102,52 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     },
     height: 300,
     fills: fills,
-    data: dataset
+    data: dataset,
+    geographyConfig: {
+      borderColor: '#DEDEDE',
+      highlightBorderWidth: 3,
+      // don't change color on mouse hover
+      highlightFillColor: function(geo) {
+        return fills[geo.fillKey] || '#F5F5F5';
+      },
+      // only change border
+      highlightBorderColor: '#B7B7B7',
+      // show desired information in tooltip
+      popupTemplate: function(geo, data) { 
+        return ;
+      }
+    }
   });
 
   function zoomToCountry(country,coordinates){
+    var studentCount = d3.nest()
+      .key(function(d) { return d.Land; })
+      .key(function(d) { return d.Uitwisselingsinstelling; })
+      .rollup(function(leaves) { return leaves.length;})
+      .entries(csv_data);
+    var countryStudentCount = studentCount.find(obj => {
+      return obj.key === country;
+    }).values;
+
+    // Build color scale
+    var studentPerUniValues = Object.keys(countryStudentCount).map(function(key) {return countryStudentCount[key].values});
+    var minValue = Math.min.apply(null, studentPerUniValues);
+    var maxValue = Math.max.apply(null, studentPerUniValues);
+
+    var paletteScale = d3v5.scaleSequential()
+      .interpolator(d3v5.interpolateOrRd)
+      .domain([minValue,maxValue]);
+
+    datasetZoom = {};
+    fillsZoom = {defaultFill: '#F5F5F5'};
+
+    for(i=0;i<countryStudentCount.length;i++){
+      var university = countryStudentCount[i].key;
+      var amountOfStudents = countryStudentCount[i].values;
+      fillsZoom[university] = paletteScale(amountOfStudents);
+      datasetZoom[university] = {fillKey: university, numberOfStudents: amountOfStudents};
+    };
+
     $("#container2").empty();
     var zoomed = new Datamap({
       //scope: 'world',
@@ -121,36 +163,44 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
       return {path: path, projection: projection};
       },
       height: 300,
-      fills: fills,
-      data: dataset
+      fills: fillsZoom,
+      data: datasetZoom,
+      geographyConfig: {
+        borderColor: '#DEDEDE',
+        highlightBorderWidth: 3,
+        // don't change color on mouse hover
+        highlightFillColor: function(geo) {
+          return fills[geo.fillKey] || '#F5F5F5';
+        },
+        // only change border
+        highlightBorderColor: '#B7B7B7',
+        // show desired information in tooltip
+        popupTemplate: function(geo, data) { 
+          return ;
+        }
+      }
     });
-
 
     bubbles = [];
-    d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
-      var studentCount = d3.nest()
-        .key(function(d) { return d.Land; })
-        .key(function(d) { return d.Uitwisselingsinstelling; })
-        .rollup(function(leaves) { return leaves.length;})
-        .entries(csv_data);
-      var countryStudentCount = studentCount.find(obj => {
-        return obj.key === country;
-      }).values;
-      d3.json("Datasets/countries.json", function(data) {
-        var countryData = data.find(obj => {
-          return obj.name === country;
-        })
-        for(i=0;i<countryStudentCount.length;i++){
-          var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
-          bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
-        }
-        zoomed.bubbles(bubbles, {
-        popupTemplate: function(geo, data) {
-          return "<div class='hoverinfo'>" + data.name + "</div>";
+
+    d3.json("Datasets/countries.json", function(data) {
+      var countryData = data.find(obj => {
+        return obj.name === country;
+      })
+      for(i=0;i<countryStudentCount.length;i++){
+        var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
+        //bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
+        bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: 10, fillKey: countryStudentCount[i].key});
+      }
+      zoomed.bubbles(bubbles, {
+      popupTemplate: function(geo, data) {
+        return ['<div class="hoverinfo">',
+        '<strong>', data.name, '</strong>',
+        '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+        '</div>'].join('');
         }
       });
-      })
-    });
+    })
   };
 });
 
