@@ -1,43 +1,12 @@
 d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
 
-  var studentCountPerCountry = d3.nest()
-    .key(function(d) { return d.Land; })
-    .rollup(function(leaves) { return leaves.length;})
-    .map(csv_data);
-
-  let cf1 = crossfilter(studentCountPerCountry);
-  let studentCountByStart = cf1.dimension(student => student.Begin);
-  let cf2 = crossfilter(studentCountByStart);
-  let studentCountBetween = cf2.dimension(student => student.Eind);
-
-  // Build color scale
-  var studentValues = Object.keys(studentCountPerCountry).map(function(key) {return studentCountPerCountry[key]});
-  var minValue = Math.min.apply(null, studentValues);
-  var maxValue = Math.max.apply(null, studentValues);
-
-  var paletteScale = d3v5.scaleSequential()
-    .interpolator(d3v5.interpolateOrRd)
-    .domain([minValue,maxValue]);
-  // var paletteScale = d3.scale.linear()
-  //             .domain([minValue,maxValue])
-  //             .range(['#f1ead7','#f0af0a']); // orange color
-  //             //.range(["#EFEFFF","#02386F"]); // blue color
-
-  var dataset = {};
-  var fills = {defaultFill: '#F5F5F5', Belgium: 'rgba(0,244,244,0.9)'};
-  var countries = Datamap.prototype.worldTopo.objects.world.geometries;
-
-  countries.forEach(function(country){
-    if (Object.keys(studentCountPerCountry).includes(country.properties.name)){
-      var iso = country.properties.iso;
-      var value = studentCountPerCountry[country.properties.name];
-      fills[iso] = paletteScale(value);
-      dataset[iso] = {fillKey: iso, numberOfStudents: value};
-    }
+  csv_data.forEach(function(student) {
+    student.Begin = parseInt(student.Begin);
+    student.Eind = parseInt(student.Eind);
   });
-  dataset['BEL'].fillKey = 'Belgium';
-  fills['BEL'] = 'Belgium';
 
+  var yearSelected = [2012, 2019];
+  var dataset = makeDataset(csv_data,yearSelected);
   //map config
   var overviewMap = new Datamap({
     element: document.getElementById('container1'),
@@ -49,42 +18,48 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
         .projection(projection);
-     return {path: path, projection: projection};
+      return {
+        path: path,
+        projection: projection
+      };
     },
     done: function(datamap) {
       datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-          document.getElementById('countryName').innerHTML = geography.properties.name;
-          d3.json("Datasets/countries.json", function(data) {
-            var countryData = data.find(obj => {
-              return obj.name === geography.properties.name
-            })
-            zoomToCountry(geography.properties.name,countryData.latlng);
-          });
+        document.getElementById('countryName').innerHTML = geography.properties.name;
+        d3.json("Datasets/countries.json", function(data) {
+          var countryData = data.find(obj => {
+            return obj.name === geography.properties.name
+          })
+          zoomToCountry(geography.properties.name, countryData.latlng);
+        });
       });
     },
     height: 600,
-    fills: fills,
+    fills: {defaultFill: '#F5F5F5'},
     data: dataset,
     geographyConfig: {
-            borderColor: '#DEDEDE',
-            highlightBorderWidth: 3,
-            // don't change color on mouse hover
-            highlightFillColor: function(geo) {
-              return fills[geo.fillKey] || '#F5F5F5';
-            },
-            // only change border
-            highlightBorderColor: '#B7B7B7',
-            // show desired information in tooltip
-            popupTemplate: function(geo, data) {
-                // don't show tooltip if country don't present in dataset
-                if (!data) { return ; }
-                // tooltip content
-                return ['<div class="hoverinfo">',
-                    '<strong>', geo.properties.name, '</strong>',
-                    '<br># Students: <strong>', data.numberOfStudents, '</strong>',
-                    '</div>'].join('');
-            }
+      borderColor: '#DEDEDE',
+      highlightBorderWidth: 3,
+      // don't change color on mouse hover
+      highlightFillColor: function(geo) {
+        return geo.color || '#F5F5F5';
+      },
+      // only change border
+      highlightBorderColor: '#B7B7B7',
+      // show desired information in tooltip
+      popupTemplate: function(geo, data) {
+        // don't show tooltip if country don't present in dataset
+        if (!data) {
+          return;
         }
+        // tooltip content
+        return ['<div class="hoverinfo">',
+          '<strong>', geo.properties.name, '</strong>',
+          '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+          '</div>'
+        ].join('');
+      }
+    }
   });
 
   //zoomed map config
@@ -98,54 +73,78 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
         .projection(projection);
-    return {path: path, projection: projection};
+      return {
+        path: path,
+        projection: projection
+      };
     },
     height: 300,
-    fills: fills,
+    fills: {defaultFill: '#F5F5F5'},
     data: dataset,
     geographyConfig: {
       borderColor: '#DEDEDE',
       highlightBorderWidth: 3,
       // don't change color on mouse hover
       highlightFillColor: function(geo) {
-        return fills[geo.fillKey] || '#F5F5F5';
+        return geo.color || '#F5F5F5';
       },
       // only change border
       highlightBorderColor: '#B7B7B7',
       // show desired information in tooltip
-      popupTemplate: function(geo, data) { 
-        return ;
+      popupTemplate: function(geo, data) {
+        return;
       }
     }
   });
 
-  function zoomToCountry(country,coordinates){
+  slider.noUiSlider.on('update',function(values,handle){
+    console.log("updated");
+    yearSelected[handle] = parseInt(values[handle]);
+    var dataset = makeDataset(csv_data,yearSelected);
+    overviewMap.updateChoropleth(dataset);
+    zoomedMap.updateChoropleth(dataset);
+  })
+
+  function zoomToCountry(country, coordinates) {
     var studentCount = d3.nest()
-      .key(function(d) { return d.Land; })
-      .key(function(d) { return d.Uitwisselingsinstelling; })
-      .rollup(function(leaves) { return leaves.length;})
+      .key(function(d) {
+        return d.Land;
+      })
+      .key(function(d) {
+        return d.Uitwisselingsinstelling;
+      })
+      .rollup(function(leaves) {
+        return leaves.length;
+      })
       .entries(csv_data);
     var countryStudentCount = studentCount.find(obj => {
       return obj.key === country;
     }).values;
 
     // Build color scale
-    var studentPerUniValues = Object.keys(countryStudentCount).map(function(key) {return countryStudentCount[key].values});
+    var studentPerUniValues = Object.keys(countryStudentCount).map(function(key) {
+      return countryStudentCount[key].values
+    });
     var minValue = Math.min.apply(null, studentPerUniValues);
     var maxValue = Math.max.apply(null, studentPerUniValues);
 
     var paletteScale = d3v5.scaleSequential()
       .interpolator(d3v5.interpolateOrRd)
-      .domain([minValue,maxValue]);
+      .domain([minValue, maxValue]);
 
     datasetZoom = {};
-    fillsZoom = {defaultFill: '#F5F5F5'};
+    fillsZoom = {
+      defaultFill: '#F5F5F5'
+    };
 
-    for(i=0;i<countryStudentCount.length;i++){
+    for (i = 0; i < countryStudentCount.length; i++) {
       var university = countryStudentCount[i].key;
       var amountOfStudents = countryStudentCount[i].values;
       fillsZoom[university] = paletteScale(amountOfStudents);
-      datasetZoom[university] = {fillKey: university, numberOfStudents: amountOfStudents};
+      datasetZoom[university] = {
+        fillKey: university,
+        numberOfStudents: amountOfStudents
+      };
     };
 
     $("#container2").empty();
@@ -160,7 +159,10 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
           .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
         var path = d3.geo.path()
           .projection(projection);
-      return {path: path, projection: projection};
+        return {
+          path: path,
+          projection: projection
+        };
       },
       height: 300,
       fills: fillsZoom,
@@ -175,8 +177,8 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         // only change border
         highlightBorderColor: '#B7B7B7',
         // show desired information in tooltip
-        popupTemplate: function(geo, data) { 
-          return ;
+        popupTemplate: function(geo, data) {
+          return;
         }
       }
     });
@@ -187,17 +189,24 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
       var countryData = data.find(obj => {
         return obj.name === country;
       })
-      for(i=0;i<countryStudentCount.length;i++){
-        var coordinates = getRandomCoordinates(countryData.latlng[0],countryData.latlng[1],2);
+      for (i = 0; i < countryStudentCount.length; i++) {
+        var coordinates = getRandomCoordinates(countryData.latlng[0], countryData.latlng[1], 2);
         //bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
-        bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: 10, fillKey: countryStudentCount[i].key});
+        bubbles.push({
+          name: countryStudentCount[i].key,
+          latitude: coordinates[0],
+          longitude: coordinates[1],
+          radius: 10,
+          fillKey: countryStudentCount[i].key
+        });
       }
       zoomed.bubbles(bubbles, {
-      popupTemplate: function(geo, data) {
-        return ['<div class="hoverinfo">',
-        '<strong>', data.name, '</strong>',
-        '<br># Students: <strong>', data.numberOfStudents, '</strong>',
-        '</div>'].join('');
+        popupTemplate: function(geo, data) {
+          return ['<div class="hoverinfo">',
+            '<strong>', data.name, '</strong>',
+            '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+            '</div>'
+          ].join('');
         }
       });
     })
@@ -205,14 +214,63 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 });
 
 
+
 function getRandomInteger(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) ) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getRandomCoordinates(xCenter, yCenter, maxRadius){
-  var angle = Math.random()*Math.PI*2;
-  var radius = getRandomInteger(0,maxRadius);
-  var x = xCenter + Math.cos(angle)*radius;
-  var y = yCenter + Math.sin(angle)*radius;
-  return [x,y];
+function getRandomCoordinates(xCenter, yCenter, maxRadius) {
+  var angle = Math.random() * Math.PI * 2;
+  var radius = getRandomInteger(0, maxRadius);
+  var x = xCenter + Math.cos(angle) * radius;
+  var y = yCenter + Math.sin(angle) * radius;
+  return [x, y];
+}
+
+function makeDataset(data, selected) {
+  var cf = crossfilter(data);
+  var studentCountByStart = cf.dimension(student => student.Begin);
+  var studentCountByEnd = cf.dimension(student => student.Eind);
+  var studentCountPerCountry = {};
+
+  studentCountByStart.filter([selected[0], Infinity]);
+  studentCountByEnd.filter([-Infinity, selected[1] + 1]);
+
+  studentCountPerCountry = d3.nest()
+    .key(function(d) {
+      return d.Land;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .map(studentCountByEnd.top(Infinity));
+
+  // Build color scale
+  var studentValues = Object.keys(studentCountPerCountry).map(function(key) {
+    return studentCountPerCountry[key]
+  });
+  var minValue = Math.min.apply(null, studentValues);
+  var maxValue = Math.max.apply(null, studentValues);
+
+  var paletteScale = d3v5.scaleSequential()
+    .interpolator(d3v5.interpolateOrRd)
+    .domain([minValue, maxValue]);
+
+  var dataset = {};
+  var countries = Datamap.prototype.worldTopo.objects.world.geometries;
+
+  countries.forEach(function(country) {
+    if (Object.keys(studentCountPerCountry).includes(country.properties.name)) {
+      var iso = country.properties.iso;
+      var value = studentCountPerCountry[country.properties.name];
+      dataset[iso] = {
+        color: paletteScale(value),
+        numberOfStudents: value
+      };
+    }
+  });
+  if (dataset.BEL !== undefined)
+    dataset.BEL.color = 'rgba(0,244,244,0.9)';
+
+  return dataset;
 }

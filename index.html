@@ -1,29 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Erasmus visualisatie</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="D3 Version 5/d3v5.js"></script>
-    <script type="text/javascript" src="crossfilter.min.js"></script>
-    <script src="http://d3js.org/topojson.v2.min.js"></script>
-    <script src="datamaps.world.hires.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  </head>
 
-  <body>
-    <div class="flex-row-container">
-        <div id="container1" style="width: 60%; max-height: 600px; position: relative;"></div>
-        <div class="flex-column-container">
-          <div>
-            <p class="title" id="countryName">Belgium</p>
-          </div>
-          <div id="container2" style="max-height: 300px; position: relative;"></div>
-          <div id="container3" style="max-height: 300px;"></div>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <title>Erasmus visualisatie</title>
+  <link rel="stylesheet" type="text/css" href="index.css">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="D3 Version 5/d3v5.js"></script>
+  <script type="text/javascript" src="crossfilter.min.js"></script>
+  <script src="http://d3js.org/topojson.v2.min.js"></script>
+  <script src="datamaps.world.hires.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <div id="slider"></div>
+
+  <script src="noUiSlider-13.1.5\src\nouislider.js"></script>
+
+  <script>
+    var slider = document.getElementById('slider');
+
+    noUiSlider.create(slider, {
+      start: [2012, 2019],
+      connect: true,
+      step: 1,
+      margin: 1,
+      behaviour: 'tap-drag',
+      range: {
+        'min': 2012,
+        'max': 2019
+      },
+      pips: {
+        mode: 'count',
+        values: 8,
+        stepped: true,
+        density: 100,
+      }
+    });
+  </script>
+  <div class="flex-row-container">
+    <div id="container1" style="width: 60%; max-height: 600px; position: relative;"></div>
+    <div class="flex-column-container">
+      <div>
+        <p class="title" id="countryName">Belgium</p>
+      </div>
+      <div id="container2" style="max-height: 300px; position: relative;"></div>
+      <div id="container3" style="max-height: 300px;"></div>
     </div>
+  </div>
 
-    <script src='index.js'></script>
-  </body>
+  <script src='index.js'></script>
+</body>
+
 </html>
