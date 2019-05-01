@@ -14,32 +14,36 @@
 </head>
 
 <body>
-  <div id="slider"></div>
-
-  <script src="noUiSlider-13.1.5\src\nouislider.js"></script>
-
-  <script>
-    var slider = document.getElementById('slider');
-
-    noUiSlider.create(slider, {
-      start: [2012, 2019],
-      connect: true,
-      step: 1,
-      margin: 1,
-      behaviour: 'tap-drag',
-      range: {
-        'min': 2012,
-        'max': 2019
-      },
-      pips: {
-        mode: 'count',
-        values: 8,
-        stepped: true,
-        density: 100,
-      }
-    });
-  </script>
   <div class="flex-row-container">
+    <div id="container-interaction">
+      <div>
+        <p class="title">Academiejaren</p>
+      </div>
+      <div id="slider"></div>
+      <script src="nouislider.js"></script>
+        <script>
+          var slider = document.getElementById('slider');
+    
+          noUiSlider.create(slider, {
+            start: [2012, 2019],
+            connect: true,
+            step: 1,
+            margin: 1,
+            behaviour: 'tap-drag',
+            range: {
+              'min': 2012,
+              'max': 2019
+            },
+            pips: {
+              mode: 'count',
+              values: 8,
+              stepped: true,
+              density: 100,
+            }
+          });
+        </script>
+    </div>
+  
     <div id="container1" style="width: 60%; max-height: 600px; position: relative;"></div>
     <div class="flex-column-container">
       <div>

@@ -7,6 +7,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   var yearSelected = [2012, 2019];
   var dataset = makeDataset(csv_data,yearSelected);
+  console.log(dataset);
   //map config
   var overviewMap = new Datamap({
     element: document.getElementById('container1'),
@@ -102,7 +103,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     yearSelected[handle] = parseInt(values[handle]);
     var dataset = makeDataset(csv_data,yearSelected);
     overviewMap.updateChoropleth(dataset);
-    zoomedMap.updateChoropleth(dataset);
+    //zoomedMap.updateChoropleth(dataset);
   })
 
   function zoomToCountry(country, coordinates) {
@@ -147,8 +148,21 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
       };
     };
 
+    var countryColor = '#DEDEDE';
+    var countries = Datamap.prototype.worldTopo.objects.world.geometries;
+    countries.forEach(function(datamapsCountry) {
+      if (country==datamapsCountry.properties.name) {
+        var iso = datamapsCountry.properties.iso;
+        countryColor = dataset[iso].color;
+        colorLowerOpacity = countryColor.slice(0,countryColor.length-1)+ ', 0.2)'
+        fillsZoom[iso] = colorLowerOpacity;
+        datasetZoom[iso] = {fillKey: iso};
+      }
+    });
+
+    console.log(datasetZoom);
     $("#container2").empty();
-    var zoomed = new Datamap({
+    zoomedMap = new Datamap({
       //scope: 'world',
       element: document.getElementById('container2'),
       //set projection to Europe
@@ -197,10 +211,10 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
           latitude: coordinates[0],
           longitude: coordinates[1],
           radius: 10,
-          fillKey: countryStudentCount[i].key
+          fillKey: countryStudentCount[i].key,
         });
       }
-      zoomed.bubbles(bubbles, {
+      zoomedMap.bubbles(bubbles, {
         popupTemplate: function(geo, data) {
           return ['<div class="hoverinfo">',
             '<strong>', data.name, '</strong>',
@@ -270,7 +284,7 @@ function makeDataset(data, selected) {
     }
   });
   if (dataset.BEL !== undefined)
-    dataset.BEL.color = 'rgba(0,244,244,0.9)';
+    dataset.BEL.color = '#3FB8AF';//'rgba(0,244,244,0.9)';
 
   return dataset;
 }
