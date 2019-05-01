@@ -7,7 +7,6 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   var yearSelected = [2012, 2019];
   var dataset = makeDataset(csv_data,yearSelected);
-  console.log(dataset);
   //map config
   var overviewMap = new Datamap({
     element: document.getElementById('container1'),
@@ -99,7 +98,6 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   });
 
   slider.noUiSlider.on('update',function(values,handle){
-    console.log("updated");
     yearSelected[handle] = parseInt(values[handle]);
     var dataset = makeDataset(csv_data,yearSelected);
     overviewMap.updateChoropleth(dataset);
@@ -156,11 +154,10 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         countryColor = dataset[iso].color;
         colorLowerOpacity = countryColor.slice(0,countryColor.length-1)+ ', 0.2)'
         fillsZoom[iso] = colorLowerOpacity;
-        datasetZoom[iso] = {fillKey: iso};
+        datasetZoom[iso] = {fillKey: iso, borderColor:colorLowerOpacity};
       }
     });
 
-    console.log(datasetZoom);
     $("#container2").empty();
     zoomedMap = new Datamap({
       //scope: 'world',
@@ -186,7 +183,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         highlightBorderWidth: 3,
         // don't change color on mouse hover
         highlightFillColor: function(geo) {
-          return fills[geo.fillKey] || '#F5F5F5';
+          return fillsZoom[geo.fillKey] || '#F5F5F5';
         },
         // only change border
         highlightBorderColor: '#B7B7B7',
@@ -198,6 +195,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     });
 
     bubbles = [];
+
 
     d3.json("Datasets/countries.json", function(data) {
       var countryData = data.find(obj => {
@@ -218,7 +216,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
         popupTemplate: function(geo, data) {
           return ['<div class="hoverinfo">',
             '<strong>', data.name, '</strong>',
-            '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+            '<br># Students: <strong>', datasetZoom[data.name].numberOfStudents, '</strong>',
             '</div>'
           ].join('');
         }
