@@ -32,6 +32,28 @@ div.container-interaction {
   flex-direction: column;
 }
 
+.line {
+  fill: none;
+  stroke: #3FB8AF;
+  stroke-width: 3;
+}
+
+.overlay {
+fill: none;
+pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+  fill: #3FB8AF;
+  stroke: #fff;
+}
+
+.focus circle {
+fill: none;
+stroke: #3FB8AF;
+}
+
 /*! nouislider - 13.1.5 - 4/24/2019 */
 /* Functional styling;
  * These styles are required for noUiSlider to function.

@@ -3,6 +3,8 @@ var zoomedMap;
 var selectedData;
 var selectedCountry;
 var selectedCountryCoordinates;
+//view = 'world', 'country' or 'university'
+var view = 'world';
 
 d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
   csv_data.forEach(function(student) {
@@ -23,7 +25,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     var dataset = makeDataset(csv_data,yearSelected);
     selectedData = updateSelectedData(csv_data,yearSelected[0],yearSelected[1]);
     overviewMap.updateChoropleth(dataset);
-    if(selectedCountry!=undefined){
+    if(view=='country' || view=='university'){
       zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
     }
     updateText(yearSelected[0],yearSelected[1],countStudents(dataset));
@@ -88,6 +90,12 @@ function makeDataset(data, selected) {
 }
 
 function initializeView(dataset){
+  initializeMaps(dataset);
+  initializeStudentCountGraph();
+  initializeFacultyGraph();
+}
+
+function initializeMaps(dataset){
   //map config
   overviewMap = new Datamap({
     element: document.getElementById('container1'),
@@ -113,6 +121,7 @@ function initializeView(dataset){
           })
           selectedCountry = geography.properties.name;
           selectedCountryCoordinates = countryData.latlng;
+          view = 'country';
           zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
         });
       });
@@ -144,41 +153,80 @@ function initializeView(dataset){
       }
     }
   });
+}
 
-  //zoomed map config
-  zoomedMap = new Datamap({
-    element: document.getElementById('container2'),
-    //set projection to Europe
-    setProjection: function(element, options) {
-      var projection = d3.geo.mercator()
-        .center([4.7, 50.87])
-        .scale(1200)
-        .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
-      var path = d3.geo.path()
-        .projection(projection);
-      return {
-        path: path,
-        projection: projection
-      };
-    },
-    height: 300,
-    fills: {defaultFill: '#F5F5F5'},
-    data: dataset,
-    geographyConfig: {
-      borderColor: '#DEDEDE',
-      highlightBorderWidth: 3,
-      // don't change color on mouse hover
-      highlightFillColor: function(geo) {
-        return '#F5F5F5';
-      },
-      // only change border
-      highlightBorderColor: false,
-      // show desired information in tooltip
-      popupTemplate: function(geo, data) {
-        return;
-      }
-    }
-  });
+function initializeStudentCountGraph(){
+  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+    , width = (window.innerWidth - margin.left - margin.right)/3
+    , height = (window.innerHeight - margin.top - margin.bottom)/2;
+
+  //number of datapoints
+  var n = 7;
+  //var years = ['2012-2013', '2013-2014', '2014-2015', '2015-2016', '2016-2017', '2017-2018', '2018-2019'];
+  var years = [2012, 2013, 2014, 2015, 2016, 2017, 2018];
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  var data = [];
+  for(i=0;i<n;i++){
+    data.push({y:yearlyCount[i].values})
+  };
+  var maxCount = Math.max.apply(Math, data.map(function(o) { return o.y; }));
+
+  var xScale = d3v5.scaleLinear()
+      .domain([0, n-1]) 
+      .range([0, width]); 
+
+  var yScale = d3v5.scaleLinear()
+      .domain([0, maxCount])  
+      .range([height, 0]);  
+
+  var line = d3v5.line()
+      .x(function(d, i) { return xScale(i); }) 
+      .y(function(d) { return yScale(d.y); }) 
+      .curve(d3v5.curveMonotoneX) 
+
+  var svg = d3v5.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3v5.axisBottom(xScale).ticks(n).tickValues([0,1,2,3,4,5,6])
+      .tickFormat(function(n) { 
+        var i = n+2
+        var j = n+3
+        return "201"+ i + "-201" + j
+      })); 
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(d3v5.axisLeft(yScale)); 
+
+  svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line);
+
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle") 
+      .attr("class", "dot")
+      .attr("cx", function(d, i) { return xScale(i) })
+      .attr("cy", function(d) { return yScale(d.y) })
+      .attr("r", 5)
+}
+
+function initializeFacultyGraph(){
+
 }
 
 function zoomToCountry(country, coordinates, dataset) {
