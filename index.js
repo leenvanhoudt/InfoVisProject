@@ -3,6 +3,9 @@ var zoomedMap;
 var selectedData;
 var selectedCountry;
 var selectedCountryCoordinates;
+var selectedUniversity;
+var nodes;
+var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
 
@@ -14,7 +17,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   selectedData = csv_data;
 
-  var yearSelected = [2012, 2019];
+  yearSelected = [2012, 2019];
   var dataset = makeDataset(csv_data,yearSelected);
   updateText(yearSelected[0],yearSelected[1],countStudents(dataset));
 
@@ -27,8 +30,12 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     overviewMap.updateChoropleth(dataset);
     if(view=='country' || view=='university'){
       zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
+    }else{
+      updateStudentCountGraph(yearSelected[0],yearSelected[1]);
     }
     updateText(yearSelected[0],yearSelected[1],countStudents(dataset));
+    //TODO
+    updateFacultyGraph();
   })
 });
 
@@ -91,7 +98,8 @@ function makeDataset(data, selected) {
 
 function initializeView(dataset){
   initializeMaps(dataset);
-  initializeStudentCountGraph();
+  initializeStudentCountGraph(2012,2019);
+  //TODO
   initializeFacultyGraph();
 }
 
@@ -126,7 +134,7 @@ function initializeMaps(dataset){
         });
       });
     },
-    height: 600,
+    height: 550,
     fills: {defaultFill: '#F5F5F5'},
     data: dataset,
     geographyConfig: {
@@ -155,81 +163,134 @@ function initializeMaps(dataset){
   });
 }
 
-function initializeStudentCountGraph(){
+function initializeStudentCountGraph(begin, end){
   var margin = {top: 50, right: 50, bottom: 50, left: 50}
     , width = (window.innerWidth - margin.left - margin.right)/3
     , height = (window.innerHeight - margin.top - margin.bottom)/2;
 
   //number of datapoints
-  var n = 7;
-  //var years = ['2012-2013', '2013-2014', '2014-2015', '2015-2016', '2016-2017', '2017-2018', '2018-2019'];
-  var years = [2012, 2013, 2014, 2015, 2016, 2017, 2018];
-  var yearlyCount = d3.nest()
-    .key(function(d) {
-      return d.Begin;
-    })
-    .rollup(function(leaves) {
-      return leaves.length;
-    })
-    .entries(selectedData);
-  var data = [];
-  for(i=0;i<n;i++){
-    data.push({y:yearlyCount[i].values})
-  };
-  var maxCount = Math.max.apply(Math, data.map(function(o) { return o.y; }));
+  var n = end-begin;
+  var yearlyCount = getStudentCountPerYearTotal();
 
-  var xScale = d3v5.scaleLinear()
-      .domain([0, n-1]) 
-      .range([0, width]); 
+  // Set the ranges
+  var x = d3v5.scaleLinear().range([0, width]);
+  var y = d3v5.scaleLinear().range([height, 0]);
 
-  var yScale = d3v5.scaleLinear()
-      .domain([0, maxCount])  
-      .range([height, 0]);  
+  // Define the axes
+  var xAxis = d3v5.axisBottom(x).ticks(n);
 
-  var line = d3v5.line()
-      .x(function(d, i) { return xScale(i); }) 
-      .y(function(d) { return yScale(d.y); }) 
-      .curve(d3v5.curveMonotoneX) 
+  var yAxis = d3v5.axisLeft(y);
+
+  // Define the line
+  var valueline = d3v5.line()
+      .x(function(d) { return x(d.key); })
+      .y(function(d) { return y(d.values); })
+      .curve(d3v5.curveMonotoneX);
 
   var svg = d3v5.select("body").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  
+
+  // Scale the range of the data
+  x.domain(d3v5.extent(yearlyCount, function(d) { return d.key; }));
+  y.domain([0, d3v5.max(yearlyCount, function(d) { return d.values; })]);
+
+  // Add the valueline path
+  svg.append("path")
+      .attr("class", "line")
+      .attr("d", valueline(yearlyCount));
+
+  // Add the X Axis
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3v5.axisBottom(xScale).ticks(n).tickValues([0,1,2,3,4,5,6])
-      .tickFormat(function(n) { 
-        var i = n+2
-        var j = n+3
-        return "201"+ i + "-201" + j
-      })); 
+      .call(xAxis);
 
+  // Add the Y Axis
   svg.append("g")
       .attr("class", "y axis")
-      .call(d3v5.axisLeft(yScale)); 
+      .call(yAxis);
 
-  svg.append("path")
-      .datum(data)
-      .attr("class", "line")
-      .attr("d", line);
-
-  svg.selectAll(".dot")
-      .data(data)
+  // add nodes
+  nodes = svg.selectAll(".dot")
+      .data(yearlyCount)
     .enter().append("circle") 
       .attr("class", "dot")
-      .attr("cx", function(d, i) { return xScale(i) })
-      .attr("cy", function(d) { return yScale(d.y) })
+      .attr("cx", function(d) { return x(d.key) })
+      .attr("cy", function(d) { return y(d.values) })
       .attr("r", 5)
 }
 
-function initializeFacultyGraph(){
+function updateStudentCountGraph(begin, end) {
+  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+    , width = (window.innerWidth - margin.left - margin.right)/3
+    , height = (window.innerHeight - margin.top - margin.bottom)/2;
 
+  //number of datapoints
+  var n = end-begin;
+  var yearlyCount;
+  switch(view){
+    case 'world':
+      yearlyCount = getStudentCountPerYearTotal();
+      break;
+    case 'country':
+      yearlyCount = getStudentCountPerYearCountry(selectedCountry);
+      break;
+    case 'university':
+      yearlyCount = getStudentCountPerYearUniversity(selectedUniversity);
+      break;
+    default:
+      yearlyCount = getStudentCountPerYearTotal();
+  }
+
+  // Set the ranges
+  var x = d3v5.scaleLinear().range([0, width]);
+  var y = d3v5.scaleLinear().range([height, 0]);
+
+  // Define the axes
+  var xAxis = d3v5.axisBottom(x).ticks(n);
+
+  var yAxis = d3v5.axisLeft(y);
+
+  // Define the line
+  var valueline = d3v5.line()
+      .x(function(d) { return x(d.key); })
+      .y(function(d) { return y(d.values); })
+      .curve(d3v5.curveMonotoneX);
+
+  // Scale the range of the data
+  x.domain(d3v5.extent(yearlyCount, function(d) { return d.key; }));
+  y.domain([0, d3v5.max(yearlyCount, function(d) { return d.values; })]);
+
+  var svg = d3v5.select("body").transition();
+  svg.select(".line") 
+      //.duration(750)
+      .attr("d", valueline(yearlyCount));
+  svg.select(".y.axis")
+      //.duration(750)
+      .call(yAxis);
+  svg.select(".x.axis")
+      //.duration(750)
+      .call(xAxis);
+  nodes
+    //.data(yearlyCount)
+    .attr("cx", function(d) { return x(d.key) })
+    .attr("cy", function(d) { return y(d.values) })
+    .attr("r", 5)
+}
+
+function initializeFacultyGraph(){
+  //TODO
+}
+
+function updateFacultyGraph(){
+  //TODO
 }
 
 function zoomToCountry(country, coordinates, dataset) {
+  updateStudentCountGraph(yearSelected[0],yearSelected[1]);
   var studentCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -354,6 +415,54 @@ function countStudents(dataset){
     count += dataset[country].numberOfStudents;
   })
   return count;
+}
+
+function getStudentCountPerYearTotal(){
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  return yearlyCount;
+}
+
+function getStudentCountPerYearCountry(country){
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Land;
+    })
+    .key(function(d) {
+      return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  var yearlyCountPerCountry = yearlyCount.find(obj => {
+    return obj.key === country;
+  }).values;
+  return yearlyCountPerCountry;
+}
+
+function getStudentCountPerYearUniversity(university){
+  var studentCount = d3.nest()
+    .key(function(d) {
+      return d.Uitwisselingsinstelling;
+    })
+    .key(function(d) {
+      return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  var yearlyCountPerUniversity = studentCount.find(obj => {
+    return obj.key === university;
+  }).values;
+  return yearlyCountPerUniversity;
 }
 
 function updateText(begin, end, totalCount){
