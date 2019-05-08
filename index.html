@@ -46,6 +46,14 @@
   
     <div id="container1" style="width: 50%; max-height: 600px; position: relative;"></div>
     <div class="flex-column-container">
+      <div class="wrap">
+        <div class="search">
+            <input type="text" class="searchTerm" placeholder="Search for universities..." id="searchValue">
+            <button type="submit" class="searchButton" onclick="onClickSearchButton(document.getElementById('searchValue').value)">
+              <text>Search</text>
+          </button>
+        </div>
+      </div>
       <div>
         <p class="title" id="countryName">Belgium</p>
         <p class="title" id="universityName"></p>

@@ -450,6 +450,14 @@ function zoomToCountry(country, coordinates, dataset) {
   });
 };
 
+function onClickSearchButton(searchValue){
+  var dataset = makeDataset(selectedData,yearSelected);
+  view = 'university';
+  //TODO: vindt universiteit
+  //TODO: vindt land van univesiteit
+  //zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
+}
+
 
 ///HELP FUNCTIONS///
 function countStudentsTotal(dataset){
