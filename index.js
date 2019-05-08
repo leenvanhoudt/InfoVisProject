@@ -245,7 +245,9 @@ function updateStudentCountGraph(begin, end) {
   var y = d3v5.scaleLinear().range([height, 0]);
 
   // Define the axes
-  var xAxis = d3v5.axisBottom(x).ticks(n);
+  var xAxis = d3v5.axisBottom(x)
+    .ticks(n)
+    .tickFormat(d3.format("d"));
   var yAxis = d3v5.axisLeft(y);
 
   // Define the line
