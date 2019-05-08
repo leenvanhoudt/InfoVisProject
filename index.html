@@ -23,7 +23,7 @@
       <script src="nouislider.js"></script>
         <script>
           var slider = document.getElementById('slider');
-    
+
           noUiSlider.create(slider, {
             start: [2012, 2019],
             connect: true,
@@ -43,14 +43,36 @@
           });
         </script>
     </div>
-  
+    <div>
+    <input type="checkbox" class="allCheckbox" value="Alle Faculteiten"> Alle Faculteiten
+    <input type="checkbox" class="myCheckbox" value="Fac. Psychologie en Pedagogische Wet."> Psychologie en Pedagogische Wet.
+    <input type="checkbox" class="myCheckbox" value="Faculteit Geneeskunde"> Geneeskunde
+    <input type="checkbox" class="myCheckbox" value="Faculteit Rechtsgeleerdheid"> Rechtsgeleerdheid
+    <input type="checkbox" class="myCheckbox" value="Faculteit Economie en Bedrijfswetensch."> Economie en Bedrijfswetensch.
+    <input type="checkbox" class="myCheckbox" value="Faculteit Ingenieurswetenschappen"> Ingenieurswetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Letteren"> Letteren
+    <input type="checkbox" class="myCheckbox" value="Faculteit Wetenschappen"> Wetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Farmaceutische Wetenschappen"> Farmaceutische Wetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Theologie en Religiewetensch."> Theologie en Religiewetensch.
+    <input type="checkbox" class="myCheckbox" value="Hoger Instituut voor Wijsbegeerte"> Hoger Instituut voor Wijsbegeerte
+    <input type="checkbox" class="myCheckbox" value="FaBeR"> Bewegings- en Revalidatiewetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Sociale Wetenschappen"> Sociale Wetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Bio-ingenieurswetenschappen"> Bio-ingenieurswetenschappen
+    <input type="checkbox" class="myCheckbox" value="Fac. Industriële Ingenieurswetenschappen"> Industriële Ingenieurswetenschappen
+    <input type="checkbox" class="myCheckbox" value="Faculteit Architectuur"> Architectuur
+    </div>
+    <script>
+      d3.select(".allCheckbox").property("checked",true);
+      d3.selectAll(".myCheckbox").property("checked", true);
+    </script>
+
     <div id="container1" style="width: 50%; max-height: 600px; position: relative;"></div>
     <div class="flex-column-container">
       <div class="wrap">
         <div class="search">
-            <input type="text" class="searchTerm" placeholder="Search for universities..." id="searchValue">
+            <input type="text" class="searchTerm" placeholder="Zoek universiteiten..." id="searchValue">
             <button type="submit" class="searchButton" onclick="onClickSearchButton(document.getElementById('searchValue').value)">
-              <text>Search</text>
+              <text>Zoek</text>
           </button>
         </div>
       </div>

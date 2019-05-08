@@ -17,61 +17,80 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   });
 
   selectedData = csv_data;
-
   yearSelected = [2012, 2019];
-  var dataset = makeDataset(csv_data,yearSelected);
-  updateText(yearSelected[0],yearSelected[1],countStudentsTotal(dataset));
+
+  var dataset = makeDataset(csv_data);
+  updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
 
   initializeView(dataset);
 
-  slider.noUiSlider.on('update',function(values,handle){
+  d3.select(".allCheckbox").on("change", checkAll);
+  d3.selectAll(".myCheckbox").on("change", checkSingle);
+  slider.noUiSlider.on('update', function(values, handle) {
     yearSelected[handle] = parseInt(values[handle]);
-    var dataset = makeDataset(csv_data,yearSelected);
-    selectedData = updateSelectedData(csv_data,yearSelected[0],yearSelected[1]);
+    update();
+  });
+
+  function update() {
+    selectedData = updateSelectedData(csv_data, yearSelected[0], yearSelected[1], getSelectedFaculties());
+    var dataset = makeDataset(selectedData);
+    if (Object.keys(dataset).length === 0) {
+      dataset = makeDummySet(csv_data);
+    }
     overviewMap.updateChoropleth(dataset);
-    if(view=='country' || view=='university'){
-      zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
+
+    if (view == 'country' || view == 'university') {
+      zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
       //graphs en text worden geupdate in de zoomToCountry function
-    }else{
-      updateStudentCountGraph(yearSelected[0],yearSelected[1]);
-      updateText(yearSelected[0],yearSelected[1],countStudentsTotal(dataset));
+    } else {
+      updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+      updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
       //TODO
       updateFacultyGraph();
     }
-  })
+  }
+
+  function checkAll() {
+    if (d3.select(".allCheckbox").property("checked")) {
+      d3.selectAll(".myCheckbox").property("checked", true);
+    } else {
+      d3.selectAll(".myCheckbox").property("checked", false);
+    }
+    update();
+  }
+
+  function checkSingle() {
+    if (d3.select(".allCheckbox").property("checked")) {
+      d3.select(".allCheckbox").property("checked", false);
+    } else if (d3.selectAll(".myCheckbox").property("checked")) {
+      d3.select(".allCheckbox").property("checked", true);
+    }
+    update();
+  }
 });
 
-function updateSelectedData(csv_data,begin, end){
-  //TODO faculteiten selectie toevoegen
+function updateSelectedData(csv_data, begin, end, faculties) {
   selectedYears = [];
-  for(year = begin; year < end; year++){
+  for (year = begin; year < end; year++) {
     selectedYears.push(year);
   };
-  var selectedData = csv_data.filter(function(d){
-    if( selectedYears.includes(d["Begin"])){ 
+  var selectedData = csv_data.filter(function(d) {
+    if (selectedYears.includes(d["Begin"]) && faculties.includes(d["Faculteit"])) {
       return d;
-    } 
+    }
   })
   return selectedData;
 }
 
-function makeDataset(data, selected) {
-  var cf = crossfilter(data);
-  var studentCountByStart = cf.dimension(student => student.Begin);
-  var studentCountByEnd = cf.dimension(student => student.Eind);
-  var studentCountPerCountry = {};
-
-  studentCountByStart.filter([selected[0], Infinity]);
-  studentCountByEnd.filter([-Infinity, selected[1] + 1]);
-
-  studentCountPerCountry = d3.nest()
+function makeDataset(data) {
+  var studentCountPerCountry = d3.nest()
     .key(function(d) {
       return d.Land;
     })
     .rollup(function(leaves) {
       return leaves.length;
     })
-    .map(studentCountByEnd.top(Infinity));
+    .map(data);
 
   // Build color scale
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {
@@ -93,19 +112,45 @@ function makeDataset(data, selected) {
     }
   });
   if (dataset.BEL !== undefined)
-    dataset.BEL.color = '#3FB8AF';//'rgba(0,244,244,0.9)';
+    dataset.BEL.color = '#3FB8AF'; //'rgba(0,244,244,0.9)';
 
   return dataset;
 }
 
-function initializeView(dataset){
+function makeDummySet(data) {
+  var studentCountPerCountry = d3.nest()
+    .key(function(d) {
+      return d.Land;
+    })
+    .map(data);
+
+  var dataset = {};
+  var countries = Datamap.prototype.worldTopo.objects.world.geometries;
+
+  countries.forEach(function(country) {
+    if (Object.keys(studentCountPerCountry).includes(country.properties.name)) {
+      var iso = country.properties.iso;
+      var value = studentCountPerCountry[country.properties.name];
+      dataset[iso] = {
+        color: '#F5F5F5',
+        numberOfStudents: 0
+      };
+    }
+  });
+  if (dataset.BEL !== undefined)
+    dataset.BEL.color = '#3FB8AF'; //'rgba(0,244,244,0.9)';
+
+  return dataset;
+}
+
+function initializeView(dataset) {
   initializeMaps(dataset);
-  initializeStudentCountGraph(2012,2019);
+  initializeStudentCountGraph(2012, 2019);
   //TODO
   initializeFacultyGraph();
 }
 
-function initializeMaps(dataset){
+function initializeMaps(dataset) {
   //map config
   overviewMap = new Datamap({
     element: document.getElementById('container1'),
@@ -138,7 +183,9 @@ function initializeMaps(dataset){
       });
     },
     height: 550,
-    fills: {defaultFill: '#F5F5F5'},
+    fills: {
+      defaultFill: '#F5F5F5'
+    },
     data: dataset,
     geographyConfig: {
       borderColor: '#DEDEDE',
@@ -166,13 +213,18 @@ function initializeMaps(dataset){
   });
 }
 
-function initializeStudentCountGraph(begin, end){
-  var margin = {top: 50, right: 50, bottom: 50, left: 50}
-    , width = (window.innerWidth - margin.left - margin.right)/3
-    , height = (window.innerHeight - margin.top - margin.bottom)/2;
+function initializeStudentCountGraph(begin, end) {
+  var margin = {
+      top: 50,
+      right: 50,
+      bottom: 50,
+      left: 50
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   //number of datapoints
-  var n = end-begin;
+  var n = end - begin;
   var yearlyCount = getStudentCountPerYearTotal();
 
   // Set the ranges
@@ -185,48 +237,61 @@ function initializeStudentCountGraph(begin, end){
 
   // Define the line
   var valueline = d3v5.line()
-      .x(function(d) { return x(d.key); })
-      .y(function(d) { return y(d.values); })
-      .curve(d3v5.curveMonotoneX);
+    .x(function(d) {
+      return x(d.key);
+    })
+    .y(function(d) {
+      return y(d.values);
+    })
+    .curve(d3v5.curveMonotoneX);
 
   svg = d3v5.select("body").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
     .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   // Scale the range of the data
-  x.domain(d3v5.extent(yearlyCount, function(d) { return d.key; }));
-  y.domain([0, d3v5.max(yearlyCount, function(d) { return d.values; })]);
+  x.domain(d3v5.extent(yearlyCount, function(d) {
+    return d.key;
+  }));
+  y.domain([0, d3v5.max(yearlyCount, function(d) {
+    return d.values;
+  })]);
 
   // Add the valueline path
   svg.append("path")
-      .attr("class", "line")
-      .attr("d", valueline(yearlyCount));
+    .attr("class", "line")
+    .attr("d", valueline(yearlyCount));
 
   // Add the X Axis
   svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
 
   // Add the Y Axis
   svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis);
+    .attr("class", "y axis")
+    .call(yAxis);
 
-  updateNodes(yearlyCount,x,y);
+  updateNodes(yearlyCount, x, y);
 }
 
 function updateStudentCountGraph(begin, end) {
-  var margin = {top: 50, right: 50, bottom: 50, left: 50}
-    , width = (window.innerWidth - margin.left - margin.right)/3
-    , height = (window.innerHeight - margin.top - margin.bottom)/2;
+  var margin = {
+      top: 50,
+      right: 50,
+      bottom: 50,
+      left: 50
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   //number of datapoints
-  var n = end-begin;
+  var n = end - begin;
   var yearlyCount;
-  switch(view){
+  switch (view) {
     case 'world':
       yearlyCount = getStudentCountPerYearTotal();
       break;
@@ -252,30 +317,38 @@ function updateStudentCountGraph(begin, end) {
 
   // Define the line
   var valueline = d3v5.line()
-      .x(function(d) { return x(d.key); })
-      .y(function(d) { return y(d.values); })
-      .curve(d3v5.curveMonotoneX);
+    .x(function(d) {
+      return x(d.key);
+    })
+    .y(function(d) {
+      return y(d.values);
+    })
+    .curve(d3v5.curveMonotoneX);
 
   // Scale the range of the data
-  x.domain(d3v5.extent(yearlyCount, function(d) { return d.key; }));
-  y.domain([0, d3v5.max(yearlyCount, function(d) { return d.values; })]);
+  x.domain(d3v5.extent(yearlyCount, function(d) {
+    return d.key;
+  }));
+  y.domain([0, d3v5.max(yearlyCount, function(d) {
+    return d.values;
+  })]);
 
-  svg.select(".line") 
-      //.duration(750)
-      .attr("d", valueline(yearlyCount));
+  svg.select(".line")
+    //.duration(750)
+    .attr("d", valueline(yearlyCount));
   svg.select(".y.axis")
-      //.duration(750)
-      .call(yAxis);
+    //.duration(750)
+    .call(yAxis);
   svg.select(".x.axis")
-      //.duration(750)
-      .call(xAxis);
-      
-  updateNodes(yearlyCount,x,y);
+    //.duration(750)
+    .call(xAxis);
+
+  updateNodes(yearlyCount, x, y);
 }
 
-function updateNodes(data,x,y) {
+function updateNodes(data, x, y) {
   var t = d3.transition()
-      .duration(750);
+    .duration(750);
 
   // JOIN new data with old elements.
   var nodes = svg.selectAll(".dot")
@@ -283,37 +356,45 @@ function updateNodes(data,x,y) {
 
   // EXIT old elements not present in new data.
   nodes.exit()
-      .attr("class", "dot")
+    .attr("class", "dot")
     .transition(t)
-      .remove();
+    .remove();
 
   // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
     .transition(t)
-      .attr("cx", function(d) { return x(d.key) })
-      .attr("cy", function(d) { return y(d.values) })
+    .attr("cx", function(d) {
+      return x(d.key)
+    })
+    .attr("cy", function(d) {
+      return y(d.values)
+    })
 
   // ENTER new elements present in new data.
-  nodes.enter().append("circle") 
-      .attr("class", "dot")
-      .attr("cx", function(d) { return x(d.key) })
-      .attr("cy", function(d) { return y(d.values) })
-      .attr("r", 5)
+  nodes.enter().append("circle")
+    .attr("class", "dot")
+    .attr("cx", function(d) {
+      return x(d.key)
+    })
+    .attr("cy", function(d) {
+      return y(d.values)
+    })
+    .attr("r", 5)
     .transition(t)
 }
 
-function initializeFacultyGraph(){
+function initializeFacultyGraph() {
   //TODO
 }
 
-function updateFacultyGraph(){
+function updateFacultyGraph() {
   //TODO
 }
 
 function zoomToCountry(country, coordinates, dataset) {
-  updateStudentCountGraph(yearSelected[0],yearSelected[1]);
-  if(view=='country'){
-    updateText(yearSelected[0],yearSelected[1], countStudentsCountry(dataset, country));
+  updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+  if (view == 'country') {
+    updateText(yearSelected[0], yearSelected[1], countStudentsCountry(dataset, country));
   };
 
   var studentCount = d3.nest()
@@ -356,12 +437,15 @@ function zoomToCountry(country, coordinates, dataset) {
   var countryColor = '#DEDEDE';
   var countries = Datamap.prototype.worldTopo.objects.world.geometries;
   countries.forEach(function(datamapsCountry) {
-    if (country==datamapsCountry.properties.name) {
+    if (country == datamapsCountry.properties.name) {
       var iso = datamapsCountry.properties.iso;
       countryColor = dataset[iso].color;
-      colorLowerOpacity = countryColor.slice(0,countryColor.length-1)+ ', 0.2)'
+      colorLowerOpacity = countryColor.slice(0, countryColor.length - 1) + ', 0.2)'
       fillsZoom[iso] = colorLowerOpacity;
-      datasetZoom[iso] = {fillKey: iso, borderColor:colorLowerOpacity};
+      datasetZoom[iso] = {
+        fillKey: iso,
+        borderColor: colorLowerOpacity
+      };
     }
   });
 
@@ -393,7 +477,7 @@ function zoomToCountry(country, coordinates, dataset) {
         return fillsZoom[geo.fillKey] || '#F5F5F5';
       },
       // only change border
-      highlightBorderColor: false,//'#B7B7B7',
+      highlightBorderColor: false, //'#B7B7B7',
       // show desired information in tooltip
       popupTemplate: function(geo, data) {
         return;
@@ -423,11 +507,11 @@ function zoomToCountry(country, coordinates, dataset) {
       });
     };
 
-    if(view=='university'){
+    if (view == 'university') {
       selectedUniversity = bubbles.find(obj => {
         return obj.name === selectedUniversity.name;
       });
-      updateText(yearSelected[0],yearSelected[1], selectedUniversity.numberOfStudents);
+      updateText(yearSelected[0], yearSelected[1], selectedUniversity.numberOfStudents);
     }
 
     zoomedMap.bubbles(bubbles, {
@@ -443,15 +527,15 @@ function zoomToCountry(country, coordinates, dataset) {
     d3.selectAll(".datamaps-bubble").on('click', function(bubble) {
       view = 'university';
       selectedUniversity = bubble;
-      updateStudentCountGraph(yearSelected[0],yearSelected[1]);
-      updateText(yearSelected[0],yearSelected[1],bubble.numberOfStudents);
+      updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+      updateText(yearSelected[0], yearSelected[1], bubble.numberOfStudents);
       document.getElementById('universityName').innerHTML = bubble.name;
     });
   });
 };
 
-function onClickSearchButton(searchValue){
-  var dataset = makeDataset(selectedData,yearSelected);
+function onClickSearchButton(searchValue) {
+  var dataset = makeDataset(selectedData, yearSelected);
   view = 'university';
   //TODO: vindt universiteit
   //TODO: vindt land van univesiteit
@@ -460,7 +544,7 @@ function onClickSearchButton(searchValue){
 
 
 ///HELP FUNCTIONS///
-function countStudentsTotal(dataset){
+function countStudentsTotal(dataset) {
   var count = 0;
   Object.keys(dataset).forEach(function(country) {
     count += dataset[country].numberOfStudents;
@@ -468,11 +552,11 @@ function countStudentsTotal(dataset){
   return count;
 }
 
-function countStudentsCountry(dataset, country){
+function countStudentsCountry(dataset, country) {
   var countries = Datamap.prototype.worldTopo.objects.world.geometries;
   var iso = "";
   countries.forEach(function(item) {
-    if (country==item.properties.name) {
+    if (country == item.properties.name) {
       iso = item.properties.iso;
     }
   });
@@ -481,7 +565,7 @@ function countStudentsCountry(dataset, country){
 }
 
 
-function getStudentCountPerYearTotal(){
+function getStudentCountPerYearTotal() {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Begin;
@@ -493,7 +577,7 @@ function getStudentCountPerYearTotal(){
   return yearlyCount;
 }
 
-function getStudentCountPerYearCountry(country){
+function getStudentCountPerYearCountry(country) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -511,7 +595,7 @@ function getStudentCountPerYearCountry(country){
   return yearlyCountPerCountry;
 }
 
-function getStudentCountPerYearUniversity(university){
+function getStudentCountPerYearUniversity(university) {
   var studentCount = d3.nest()
     .key(function(d) {
       return d.Uitwisselingsinstelling;
@@ -529,17 +613,17 @@ function getStudentCountPerYearUniversity(university){
   return yearlyCountPerUniversity;
 }
 
-function updateText(begin, end, totalCount){
+function updateText(begin, end, totalCount) {
   document.getElementById('begin').innerHTML = begin;
   document.getElementById('end').innerHTML = end;
   document.getElementById('totalCount').innerHTML = totalCount;
-  document.getElementById('yearlyCount').innerHTML = Math.floor(totalCount/(end-begin));
+  document.getElementById('yearlyCount').innerHTML = Math.floor(totalCount / (end - begin));
 }
 
-function buildPaletteScale(values){
+function buildPaletteScale(values) {
   var minValue = Math.min.apply(null, values);
   var maxValue = Math.max.apply(null, values);
-  var paletteScale = d3v5.scaleSequential()
+  var paletteScale = d3v5.scaleSequentialSqrt()
     .interpolator(d3v5.interpolateOrRd)
     .domain([minValue, maxValue]);
   return paletteScale;
@@ -555,4 +639,15 @@ function getRandomCoordinates(xCenter, yCenter, maxRadius) {
   var x = xCenter + Math.cos(angle) * radius;
   var y = yCenter + Math.sin(angle) * radius;
   return [x, y];
+}
+
+function getSelectedFaculties() {
+  var selectedFaculties = [];
+  d3.selectAll(".myCheckbox").each(function(d) {
+    cb = d3.select(this);
+    if (cb.property("checked")) {
+      selectedFaculties.push(cb.property("value"));
+    }
+  });
+  return selectedFaculties;
 }
