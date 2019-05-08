@@ -3,8 +3,9 @@ var zoomedMap;
 var selectedData;
 var selectedCountry;
 var selectedCountryCoordinates;
+//selectedUniversity = object with all info about the selected university
 var selectedUniversity;
-var nodes;
+var svg;
 var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
@@ -19,7 +20,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   yearSelected = [2012, 2019];
   var dataset = makeDataset(csv_data,yearSelected);
-  updateText(yearSelected[0],yearSelected[1],countStudents(dataset));
+  updateText(yearSelected[0],yearSelected[1],countStudentsTotal(dataset));
 
   initializeView(dataset);
 
@@ -30,12 +31,13 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     overviewMap.updateChoropleth(dataset);
     if(view=='country' || view=='university'){
       zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
+      //graphs en text worden geupdate in de zoomToCountry function
     }else{
       updateStudentCountGraph(yearSelected[0],yearSelected[1]);
+      updateText(yearSelected[0],yearSelected[1],countStudentsTotal(dataset));
+      //TODO
+      updateFacultyGraph();
     }
-    updateText(yearSelected[0],yearSelected[1],countStudents(dataset));
-    //TODO
-    updateFacultyGraph();
   })
 });
 
@@ -123,6 +125,7 @@ function initializeMaps(dataset){
     done: function(datamap) {
       datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
         document.getElementById('countryName').innerHTML = geography.properties.name;
+        document.getElementById('universityName').innerHTML = "";
         d3.json("Datasets/countries.json", function(data) {
           var countryData = data.find(obj => {
             return obj.name === geography.properties.name
@@ -178,7 +181,6 @@ function initializeStudentCountGraph(begin, end){
 
   // Define the axes
   var xAxis = d3v5.axisBottom(x).ticks(n);
-
   var yAxis = d3v5.axisLeft(y);
 
   // Define the line
@@ -187,7 +189,7 @@ function initializeStudentCountGraph(begin, end){
       .y(function(d) { return y(d.values); })
       .curve(d3v5.curveMonotoneX);
 
-  var svg = d3v5.select("body").append("svg")
+  svg = d3v5.select("body").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -213,14 +215,7 @@ function initializeStudentCountGraph(begin, end){
       .attr("class", "y axis")
       .call(yAxis);
 
-  // add nodes
-  nodes = svg.selectAll(".dot")
-      .data(yearlyCount)
-    .enter().append("circle") 
-      .attr("class", "dot")
-      .attr("cx", function(d) { return x(d.key) })
-      .attr("cy", function(d) { return y(d.values) })
-      .attr("r", 5)
+  updateNodes(yearlyCount,x,y);
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -239,7 +234,7 @@ function updateStudentCountGraph(begin, end) {
       yearlyCount = getStudentCountPerYearCountry(selectedCountry);
       break;
     case 'university':
-      yearlyCount = getStudentCountPerYearUniversity(selectedUniversity);
+      yearlyCount = getStudentCountPerYearUniversity(selectedUniversity.name);
       break;
     default:
       yearlyCount = getStudentCountPerYearTotal();
@@ -251,7 +246,6 @@ function updateStudentCountGraph(begin, end) {
 
   // Define the axes
   var xAxis = d3v5.axisBottom(x).ticks(n);
-
   var yAxis = d3v5.axisLeft(y);
 
   // Define the line
@@ -264,7 +258,6 @@ function updateStudentCountGraph(begin, end) {
   x.domain(d3v5.extent(yearlyCount, function(d) { return d.key; }));
   y.domain([0, d3v5.max(yearlyCount, function(d) { return d.values; })]);
 
-  var svg = d3v5.select("body").transition();
   svg.select(".line") 
       //.duration(750)
       .attr("d", valueline(yearlyCount));
@@ -274,11 +267,37 @@ function updateStudentCountGraph(begin, end) {
   svg.select(".x.axis")
       //.duration(750)
       .call(xAxis);
-  nodes
-    //.data(yearlyCount)
-    .attr("cx", function(d) { return x(d.key) })
-    .attr("cy", function(d) { return y(d.values) })
-    .attr("r", 5)
+      
+  updateNodes(yearlyCount,x,y);
+}
+
+function updateNodes(data,x,y) {
+  var t = d3.transition()
+      .duration(750);
+
+  // JOIN new data with old elements.
+  var nodes = svg.selectAll(".dot")
+    .data(data);
+
+  // EXIT old elements not present in new data.
+  nodes.exit()
+      .attr("class", "dot")
+    .transition(t)
+      .remove();
+
+  // UPDATE old elements present in new data.
+  nodes.attr("class", "dot")
+    .transition(t)
+      .attr("cx", function(d) { return x(d.key) })
+      .attr("cy", function(d) { return y(d.values) })
+
+  // ENTER new elements present in new data.
+  nodes.enter().append("circle") 
+      .attr("class", "dot")
+      .attr("cx", function(d) { return x(d.key) })
+      .attr("cy", function(d) { return y(d.values) })
+      .attr("r", 5)
+    .transition(t)
 }
 
 function initializeFacultyGraph(){
@@ -291,6 +310,10 @@ function updateFacultyGraph(){
 
 function zoomToCountry(country, coordinates, dataset) {
   updateStudentCountGraph(yearSelected[0],yearSelected[1]);
+  if(view=='country'){
+    updateText(yearSelected[0],yearSelected[1], countStudentsCountry(dataset, country));
+  };
+
   var studentCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -381,7 +404,8 @@ function zoomToCountry(country, coordinates, dataset) {
   d3.json("Datasets/countries.json", function(data) {
     var countryData = data.find(obj => {
       return obj.name === country;
-    })
+    });
+
     for (i = 0; i < countryStudentCount.length; i++) {
       //TODO: echte coordinaten gebruiken
       var coordinates = getRandomCoordinates(countryData.latlng[0], countryData.latlng[1], 2);
@@ -393,8 +417,17 @@ function zoomToCountry(country, coordinates, dataset) {
         radius: 10,
         fillKey: countryStudentCount[i].key,
         //color: paletteScale(countryStudentCount[i].values)
+        numberOfStudents: datasetZoom[countryStudentCount[i].key].numberOfStudents
       });
+    };
+
+    if(view=='university'){
+      selectedUniversity = bubbles.find(obj => {
+        return obj.name === selectedUniversity.name;
+      });
+      updateText(yearSelected[0],yearSelected[1], selectedUniversity.numberOfStudents);
     }
+
     zoomedMap.bubbles(bubbles, {
       popupTemplate: function(geo, data) {
         return ['<div class="hoverinfo">',
@@ -404,18 +437,39 @@ function zoomToCountry(country, coordinates, dataset) {
         ].join('');
       }
     });
-  })
+
+    d3.selectAll(".datamaps-bubble").on('click', function(bubble) {
+      view = 'university';
+      selectedUniversity = bubble;
+      updateStudentCountGraph(yearSelected[0],yearSelected[1]);
+      updateText(yearSelected[0],yearSelected[1],bubble.numberOfStudents);
+      document.getElementById('universityName').innerHTML = bubble.name;
+    });
+  });
 };
 
 
 ///HELP FUNCTIONS///
-function countStudents(dataset){
+function countStudentsTotal(dataset){
   var count = 0;
   Object.keys(dataset).forEach(function(country) {
     count += dataset[country].numberOfStudents;
   })
   return count;
 }
+
+function countStudentsCountry(dataset, country){
+  var countries = Datamap.prototype.worldTopo.objects.world.geometries;
+  var iso = "";
+  countries.forEach(function(item) {
+    if (country==item.properties.name) {
+      iso = item.properties.iso;
+    }
+  });
+  count = dataset[iso].numberOfStudents;
+  return count;
+}
+
 
 function getStudentCountPerYearTotal(){
   var yearlyCount = d3.nest()
