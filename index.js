@@ -10,6 +10,7 @@ var svgBar;
 var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
+var sidebarVisible = false;
 
 d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
   csv_data.forEach(function(student) {
@@ -224,59 +225,26 @@ function initializeStudentCountGraph(begin, end) {
     width = (window.innerWidth - margin.left - margin.right) / 3,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
-  //number of datapoints
-  var n = end - begin;
-  var yearlyCount = getStudentCountPerYearTotal();
-
-  // Set the ranges
-  var x = d3v5.scaleLinear().range([0, width]);
-  var y = d3v5.scaleLinear().range([height, 0]);
-
-  // Define the axes
-  var xAxis = d3v5.axisBottom(x).ticks(n);
-  var yAxis = d3v5.axisLeft(y);
-
-  // Define the line
-  var valueline = d3v5.line()
-    .x(function(d) {
-      return x(d.key);
-    })
-    .y(function(d) {
-      return y(d.values);
-    })
-    .curve(d3v5.curveMonotoneX);
-
-  svg = d3v5.select("body").append("svg")
+  svg = d3v5.select(".linegraph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Scale the range of the data
-  x.domain(d3v5.extent(yearlyCount, function(d) {
-    return d.key;
-  }));
-  y.domain([0, d3v5.max(yearlyCount, function(d) {
-    return d.values;
-  })]);
-
   // Add the valueline path
   svg.append("path")
     .attr("class", "line")
-    .attr("d", valueline(yearlyCount));
 
   // Add the X Axis
   svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
 
   // Add the Y Axis
   svg.append("g")
     .attr("class", "y axis")
-    .call(yAxis);
 
-  updateNodes(yearlyCount, x, y);
+  updateStudentCountGraph(begin,end);
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -335,19 +303,21 @@ function updateStudentCountGraph(begin, end) {
   })]);
 
   svg.select(".line")
-    //.duration(750)
     .attr("d", valueline(yearlyCount));
   svg.select(".y.axis")
-    //.duration(750)
     .call(yAxis);
   svg.select(".x.axis")
-    //.duration(750)
     .call(xAxis);
 
   updateNodes(yearlyCount, x, y);
 }
 
 function updateNodes(data, x, y) {
+  // Define the div for the tooltip
+  var div = d3.select(".linegraph").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
   var t = d3.transition()
     .duration(750);
 
@@ -358,18 +328,16 @@ function updateNodes(data, x, y) {
   // EXIT old elements not present in new data.
   nodes.exit()
     .attr("class", "dot")
-    .transition(t)
     .remove();
 
   // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .transition(t)
     .attr("cx", function(d) {
       return x(d.key)
     })
     .attr("cy", function(d) {
       return y(d.values)
-    })
+    })                 
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
@@ -381,7 +349,21 @@ function updateNodes(data, x, y) {
       return y(d.values)
     })
     .attr("r", 5)
-    .transition(t)
+    .on("mouseover", function(d) {		
+      div.transition()		
+          .duration(200)		
+          .style("opacity", .9);		
+      div.html(d.values+" students")	
+          .style("left", (d3v5.event.pageX) + "px")		
+          .style("top", (d3v5.event.pageY - 28) + "px");
+      })					
+      .on("mouseout", function(d) {		
+          div.transition()		
+              .duration(500)		
+              .style("opacity", 0);	
+      });
+
+  nodes.transition(t);
 }
 
 function initializeFacultyGraph() {
@@ -684,15 +666,6 @@ function zoomToCountry(country, coordinates, dataset) {
   });
 };
 
-function onClickSearchButton(searchValue) {
-  var dataset = makeDataset(selectedData, yearSelected);
-  view = 'university';
-  //TODO: vindt universiteit
-  //TODO: vindt land van univesiteit
-  //zoomToCountry(selectedCountry,selectedCountryCoordinates,dataset);
-}
-
-
 ///HELP FUNCTIONS///
 function countStudentsTotal(dataset) {
   var count = 0;
@@ -864,4 +837,24 @@ function getSelectedFaculties() {
     }
   });
   return selectedFaculties;
+}
+
+function toggleSidebar() {
+  if(sidebarVisible){
+    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("main").style.marginLeft= "0";
+    document.getElementById("mySidebar").style.paddingLeft = "0px";
+    document.getElementById('sidebarButton').innerHTML = ">";
+    document.getElementById('sidebarButton').style.left ="0";
+    document.getElementById('sidebarButton').style.right ="0";
+    sidebarVisible = false;
+  } else {
+    document.getElementById("mySidebar").style.width = "350px";
+    document.getElementById("main").style.marginLeft = "350px";
+    document.getElementById("mySidebar").style.paddingLeft = "40px";
+    document.getElementById('sidebarButton').innerHTML = "<";
+    document.getElementById('sidebarButton').style.left ="390px";
+    document.getElementById('sidebarButton').style.right ="390px";
+    sidebarVisible = true;
+  } 
 }
