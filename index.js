@@ -6,6 +6,7 @@ var selectedCountryCoordinates;
 //selectedUniversity = object with all info about the selected university
 var selectedUniversity;
 var svg;
+var svgBar;
 var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
@@ -384,7 +385,156 @@ function updateNodes(data, x, y) {
 }
 
 function initializeFacultyGraph() {
-  //TODO
+  var margin = {
+      top: 20,
+      right: 100,
+      bottom: 35,
+      left: 250
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+
+  svgBar = d3v5.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var facultyCount = getStudentCountPerFacultyTotal();
+
+  var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
+    return facultyCount.map(function(d) {
+      return {
+        x: d.faculty,
+        y: +d[year] || +0
+      };
+    });
+  }));
+
+  var y = d3.scale.ordinal()
+    .domain(dataset[0].map(function(d) {
+      return d.x;
+    }))
+    .rangeRoundBands([10, width - 60], 0.02);
+
+  var x = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {
+      return d3.max(d, function(d) {
+        return d.y0 + d.y;
+      });
+    })])
+    .range([0,width]);
+
+  var colors = d3v5.schemeCategory10;
+  colors.length = 7;
+
+  // Define and draw axes
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(function(d) {
+      return d
+    });
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .ticks(5)
+    .tickSize(-width, 0, 0)
+    .tickFormat(function(d) {
+      return d
+    });
+
+  svgBar.append("g")
+    .attr("class", "y axis")
+    .call(yAxis);
+
+  svgBar.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  // Create groups for each series, rects for each segment
+  var groups = svgBar.selectAll("g.cost")
+    .data(dataset)
+    .enter().append("g")
+    .attr("class", "cost")
+    .style("fill", function(d, i) {
+      return colors[i];
+    });
+
+  var rect = groups.selectAll("rect")
+    .data(function(d) {
+      return d;
+    })
+    .enter()
+    .append("rect")
+    .attr("y", function(d) {
+      return y(d.x);
+    })
+    .attr("x", function(d) {
+      return x(d.y0);
+    })
+    .attr("width", function(d) {
+      return x(d.y0+d.y)-x(d.y0);
+    })
+    .attr("height", y.rangeBand())
+    .on("mouseover", function() {
+      tooltip.style("display", null);
+    })
+    .on("mouseout", function() {
+      tooltip.style("display", "none");
+    })
+    .on("mousemove", function(d) {
+      var xPosition = d3v5.mouse(this)[0] - 15;
+      var yPosition = d3v5.mouse(this)[1] - 25;
+      tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+      tooltip.select("text").text(d.y);
+    });
+
+  var legend = svgBar.selectAll(".legend")
+    .data(colors)
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(30," + i * 19 + ")";
+    });
+
+  legend.append("rect")
+    .attr("x", width - 18)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d, i) {
+      return colors.slice().reverse()[i];
+    });
+
+  legend.append("text")
+    .attr("x", width + 5)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d, i) {
+      return 2018-i;
+    });
+
+  // Prep the tooltip bits, initial display is hidden
+  var tooltip = svgBar.append("g")
+    .attr("class", "tooltip")
+    .style("display", "none");
+
+  tooltip.append("rect")
+    .attr("width", 30)
+    .attr("height", 20)
+    .attr("fill", "white")
+    .style("opacity", 0.5);
+
+  tooltip.append("text")
+    .attr("x", 15)
+    .attr("dy", "1.2em")
+    .style("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("font-weight", "bold");
+
 }
 
 function updateFacultyGraph() {
@@ -602,6 +752,70 @@ function getStudentCountPerYearUniversity(university) {
     })
     .key(function(d) {
       return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  var yearlyCountPerUniversity = studentCount.find(obj => {
+    return obj.key === university;
+  }).values;
+  return yearlyCountPerUniversity;
+}
+
+function getStudentCountPerFacultyTotal() {
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      var newFac = d.Faculteit.replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      return newFac;
+    })
+    .key(function(d) {
+      return d.Begin;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData)
+    .map(function(d, i) {
+      var result = {
+        faculty: d.key
+      }
+      d.values.forEach(function(year) {
+        result[year.key] = year.values;
+      })
+      return result
+    });
+  return yearlyCount;
+}
+
+function getStudentCountPerFacultyCountry(country) {
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Land;
+    })
+    .key(function(d) {
+      return d.Faculteit;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+  console.log(yearlyCount);
+  var yearlyCountPerCountry = yearlyCount.find(obj => {
+    return obj.key === country;
+  }).values;
+  return yearlyCountPerCountry;
+}
+
+function getStudentCountPerFacultyUniversity(university) {
+  var studentCount = d3.nest()
+    .key(function(d) {
+      return d.Uitwisselingsinstelling;
+    })
+    .key(function(d) {
+      return d.Faculteit;
     })
     .rollup(function(leaves) {
       return leaves.length;
