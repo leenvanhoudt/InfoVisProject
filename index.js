@@ -34,7 +34,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   });
 
   function update() {
-    selectedData = updateSelectedData(csv_data, yearSelected[0], yearSelected[1], getSelectedFaculties());
+    selectedData = updateSelectedData(csv_data, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
     var dataset = makeDataset(selectedData);
     if (Object.keys(dataset).length === 0) {
       dataset = makeDummySet(csv_data);
@@ -147,7 +147,7 @@ function makeDummySet(data) {
 
 function initializeView(dataset) {
   initializeMaps(dataset);
-  initializeStudentCountGraph(2012, 2019);
+  initializeStudentCountGraph();
   //TODO
   initializeFacultyGraph();
 }
@@ -215,7 +215,7 @@ function initializeMaps(dataset) {
   });
 }
 
-function initializeStudentCountGraph(begin, end) {
+function initializeStudentCountGraph() {
   var margin = {
       top: 50,
       right: 50,
@@ -243,8 +243,6 @@ function initializeStudentCountGraph(begin, end) {
   // Add the Y Axis
   svg.append("g")
     .attr("class", "y axis")
-
-  updateStudentCountGraph(begin,end);
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -278,11 +276,15 @@ function updateStudentCountGraph(begin, end) {
   var x = d3v5.scaleLinear().range([0, width]);
   var y = d3v5.scaleLinear().range([height, 0]);
 
+  var yTicks = getSmartTicks(d3v5.max(yearlyCount, function(d) {
+    return d.values;
+  }), height);
+
   // Define the axes
   var xAxis = d3v5.axisBottom(x)
     .ticks(n)
     .tickFormat(d3.format("d"));
-  var yAxis = d3v5.axisLeft(y);
+  var yAxis = d3v5.axisLeft(y).ticks(yTicks.count);
 
   // Define the line
   var valueline = d3v5.line()
@@ -298,9 +300,7 @@ function updateStudentCountGraph(begin, end) {
   x.domain(d3v5.extent(yearlyCount, function(d) {
     return d.key;
   }));
-  y.domain([0, d3v5.max(yearlyCount, function(d) {
-    return d.values;
-  })]);
+  y.domain([0, yTicks.endPoint]);
 
   svg.select(".line")
     .attr("d", valueline(yearlyCount));
@@ -314,8 +314,8 @@ function updateStudentCountGraph(begin, end) {
 
 function updateNodes(data, x, y) {
   // Define the div for the tooltip
-  var div = d3.select(".linegraph").append("div")	
-    .attr("class", "tooltip")				
+  var div = d3.select(".linegraph").append("div")
+    .attr("class", "tooltip")
     .style("opacity", 0);
 
   var t = d3.transition()
@@ -337,7 +337,7 @@ function updateNodes(data, x, y) {
     })
     .attr("cy", function(d) {
       return y(d.values)
-    })                 
+    })
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
@@ -349,19 +349,19 @@ function updateNodes(data, x, y) {
       return y(d.values)
     })
     .attr("r", 5)
-    .on("mouseover", function(d) {		
-      div.transition()		
-          .duration(200)		
-          .style("opacity", .9);		
-      div.html(d.values+" students")	
-          .style("left", (d3v5.event.pageX) + "px")		
-          .style("top", (d3v5.event.pageY - 28) + "px");
-      })					
-      .on("mouseout", function(d) {		
-          div.transition()		
-              .duration(500)		
-              .style("opacity", 0);	
-      });
+    .on("mouseover", function(d) {
+      div.transition()
+        .duration(200)
+        .style("opacity", .9);
+      div.html(d.values + " students")
+        .style("left", (d3v5.event.pageX) + "px")
+        .style("top", (d3v5.event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(d) {
+      div.transition()
+        .duration(500)
+        .style("opacity", 0);
+    });
 
   nodes.transition(t);
 }
@@ -370,8 +370,8 @@ function initializeFacultyGraph() {
   var margin = {
       top: 20,
       right: 100,
-      bottom: 35,
-      left: 250
+      bottom: 200,
+      left: 100
     },
     width = (window.innerWidth - margin.left - margin.right) / 3,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
@@ -382,30 +382,64 @@ function initializeFacultyGraph() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var facultyCount = getStudentCountPerFacultyTotal();
+  svgBar.append("g")
+    .attr("class", "y axis");
+
+  svgBar.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")");
+}
+
+function updateFacultyGraph() {
+  var margin = {
+      top: 20,
+      right: 100,
+      bottom: 200,
+      left: 100
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+
+  var facultyCount;
+  switch (view) {
+    case 'world':
+      facultyCount = getStudentCountPerFacultyTotal();
+      break;
+    case 'country':
+      facultyCount = getStudentCountPerFacultyCountry(selectedCountry);
+      break;
+    case 'university':
+      facultyCount = getStudentCountPerFacultyUniversity(selectedUniversity.name);
+      break;
+    default:
+      facultyCount = getStudentCountPerFacultyTotal();
+  }
 
   var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
     return facultyCount.map(function(d) {
       return {
         x: d.faculty,
-        y: +d[year] || +0
+        y: +d[year] || +0,
+        sum: d3.sum(d3.values(d))
       };
     });
   }));
 
-  var y = d3.scale.ordinal()
+  var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
       return d.x;
-    }))
-    .rangeRoundBands([10, width - 60], 0.02);
+    }).sort())
+    .rangeRoundBands([10, width - 10], 0.02);
 
-  var x = d3.scale.linear()
-    .domain([0, d3.max(dataset, function(d) {
-      return d3.max(d, function(d) {
-        return d.y0 + d.y;
-      });
-    })])
-    .range([0,width]);
+  var yTicks = getSmartTicks(d3.max(dataset, function(d) {
+    return d3.max(d, function(d) {
+      return d.y0 + d.y;
+    });
+  }), height);
+
+  var y = d3.scale.linear()
+    .domain([0, yTicks.endPoint])
+    .range([height, 0]);
 
   var colors = d3v5.schemeCategory10;
   colors.length = 7;
@@ -414,6 +448,8 @@ function initializeFacultyGraph() {
   var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
+    .ticks(yTicks.count)
+    .tickSize(-width, 0, 0)
     .tickFormat(function(d) {
       return d
     });
@@ -421,25 +457,35 @@ function initializeFacultyGraph() {
   var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom")
-    .ticks(5)
-    .tickSize(-width, 0, 0)
     .tickFormat(function(d) {
       return d
     });
 
-  svgBar.append("g")
-    .attr("class", "y axis")
-    .call(yAxis);
+  svgBar.select(".y.axis")
+    .call(yAxis)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", "-6em")
+    .attr("dx", "-15em")
+    .style("text-anchor", "end")
+    .text("Students");
 
-  svgBar.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
+  svgBar.select(".x.axis")
+    .call(xAxis)
+    .selectAll("text")
+    .style("text-anchor", "end")
+    .attr("dx", "-.9em")
+    .attr("dy", ".25em")
+    .attr("transform", "rotate(-50)");
 
   // Create groups for each series, rects for each segment
   var groups = svgBar.selectAll("g.cost")
-    .data(dataset)
-    .enter().append("g")
+    .data(dataset);
+
+  groups.exit().remove();
+
+  groups.enter().append("g")
     .attr("class", "cost")
     .style("fill", function(d, i) {
       return colors[i];
@@ -448,31 +494,59 @@ function initializeFacultyGraph() {
   var rect = groups.selectAll("rect")
     .data(function(d) {
       return d;
-    })
-    .enter()
-    .append("rect")
-    .attr("y", function(d) {
-      return y(d.x);
-    })
+    });
+
+  rect.exit()
+    .remove();
+
+  rect.attr("class", "rect")
     .attr("x", function(d) {
-      return x(d.y0);
+      return x(d.x);
     })
-    .attr("width", function(d) {
-      return x(d.y0+d.y)-x(d.y0);
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
     })
-    .attr("height", y.rangeBand())
-    .on("mouseover", function() {
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand());
+
+  rect.enter()
+    .append("rect")
+    .attr("x", function(d) {
+      return x(d.x);
+    })
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
+    })
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand())
+    .on("mouseover", function(d) {
       tooltip.style("display", null);
+      tooltip2.style("display", null);
+
+      var xPos = x(d.x) + 3;
+      var yPos = y(d.sum) - 20;
+      tooltip2.attr("transform", "translate(" + xPos + "," + yPos + ")");
+      tooltip2.select("text").text(d.sum);
     })
     .on("mouseout", function() {
       tooltip.style("display", "none");
+      tooltip2.style("display", "none");
     })
-    .on("mousemove", function(d) {
-      var xPosition = d3v5.mouse(this)[0] - 15;
-      var yPosition = d3v5.mouse(this)[1] - 25;
+    .on("mousemove", function(d){
+      var xPosition = d3v5.mouse(this)[0] - 35;
+      var yPosition = d3v5.mouse(this)[1];
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
       tooltip.select("text").text(d.y);
-    });
+    })
+
+  var t = d3v5.transition()
+    .duration(750);
+  rect.transition(t);
+
 
   var legend = svgBar.selectAll(".legend")
     .data(colors)
@@ -496,7 +570,7 @@ function initializeFacultyGraph() {
     .attr("dy", ".35em")
     .style("text-anchor", "start")
     .text(function(d, i) {
-      return 2018-i;
+      return 2018 - i;
     });
 
   // Prep the tooltip bits, initial display is hidden
@@ -517,14 +591,27 @@ function initializeFacultyGraph() {
     .attr("font-size", "12px")
     .attr("font-weight", "bold");
 
-}
+  var tooltip2 = svgBar.append("g")
+    .attr("class", "tooltip")
+    .style("display", "none");
 
-function updateFacultyGraph() {
-  //TODO
+  tooltip2.append("rect")
+    .attr("width", 30)
+    .attr("height", 20)
+    .attr("fill", "white")
+    .style("opacity", 0.5);
+
+  tooltip2.append("text")
+    .attr("x", 15)
+    .attr("dy", "1.2em")
+    .style("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("font-weight", "bold");
 }
 
 function zoomToCountry(country, coordinates, dataset) {
   updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+  updateFacultyGraph();
   if (view == 'country') {
     updateText(yearSelected[0], yearSelected[1], countStudentsCountry(dataset, country));
   };
@@ -769,16 +856,29 @@ function getStudentCountPerFacultyCountry(country) {
       return d.Land;
     })
     .key(function(d) {
-      return d.Faculteit;
+      var newFac = d.Faculteit.replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      return newFac;
+    })
+    .key(function(d) {
+      return d.Begin;
     })
     .rollup(function(leaves) {
       return leaves.length;
     })
-    .entries(selectedData);
-  console.log(yearlyCount);
+    .entries(selectedData)
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
-  }).values;
+  }).values.map(function(d, i) {
+    var result = {
+      faculty: d.key
+    }
+    d.values.forEach(function(year) {
+      result[year.key] = year.values;
+    })
+    return result
+  });;
   return yearlyCountPerCountry;
 }
 
@@ -828,33 +928,63 @@ function getRandomCoordinates(xCenter, yCenter, maxRadius) {
   return [x, y];
 }
 
-function getSelectedFaculties() {
+function getSelectedFaculties(filter) {
   var selectedFaculties = [];
   d3.selectAll(".myCheckbox").each(function(d) {
     cb = d3.select(this);
     if (cb.property("checked")) {
-      selectedFaculties.push(cb.property("value"));
+      if (!filter) {
+        selectedFaculties.push(cb.property("value"));
+      } else {
+        var newFac = cb.property("value").replace("Fac. ", "");
+        newFac = newFac.replace("Faculteit ", "");
+        newFac = newFac.replace("Hoger Instituut voor ", "");
+        selectedFaculties.push(newFac);
+      }
     }
   });
   return selectedFaculties;
 }
 
 function toggleSidebar() {
-  if(sidebarVisible){
+  if (sidebarVisible) {
     document.getElementById("mySidebar").style.width = "0";
-    document.getElementById("main").style.marginLeft= "0";
+    document.getElementById("main").style.marginLeft = "0";
     document.getElementById("mySidebar").style.paddingLeft = "0px";
     document.getElementById('sidebarButton').innerHTML = ">";
-    document.getElementById('sidebarButton').style.left ="0";
-    document.getElementById('sidebarButton').style.right ="0";
+    document.getElementById('sidebarButton').style.left = "0";
+    document.getElementById('sidebarButton').style.right = "0";
     sidebarVisible = false;
   } else {
     document.getElementById("mySidebar").style.width = "350px";
     document.getElementById("main").style.marginLeft = "350px";
     document.getElementById("mySidebar").style.paddingLeft = "40px";
     document.getElementById('sidebarButton').innerHTML = "<";
-    document.getElementById('sidebarButton').style.left ="390px";
-    document.getElementById('sidebarButton').style.right ="390px";
+    document.getElementById('sidebarButton').style.left = "390px";
+    document.getElementById('sidebarButton').style.right = "390px";
     sidebarVisible = true;
-  } 
+  }
+
+}
+
+function getSmartTicks(val) {
+
+  //base step between nearby two ticks
+  var step = Math.pow(10, val.toString().length - 1);
+
+  //modify steps either: 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000...
+  if (val / step < 2) {
+    step = step / 5;
+  } else if (val / step < 5) {
+    step = step / 2;
+  }
+
+  //add one more step if the last tick value is the same as the max value
+  //if you don't want to add, remove "+1"
+  var slicesCount = Math.ceil((val + 1) / step);
+
+  return {
+    endPoint: slicesCount * step,
+    count: Math.min(10, slicesCount) //show max 10 ticks
+  }
 }
