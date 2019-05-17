@@ -34,7 +34,6 @@ div.container-interaction {
 
 .line {
   fill: none;
-  stroke: #3FB8AF;
   stroke-width: 3;
 }
 
@@ -133,6 +132,37 @@ div.tooltip {
 #main {
   transition: margin-left .5s;
   padding: 16px;
+}
+
+/* Graph styling */
+.legend {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  fill: rgb(102, 102, 102);
+}
+
+.axis.label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  fill: rgb(102, 102, 102);
+}
+
+.y.axis {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  text-decoration-color: rgb(102, 102, 102);
+}
+
+.x.axis {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  text-decoration-color: rgb(102, 102, 102);
+}
+
+.axis.title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  text-decoration-color: rgb(102, 102, 102);
 }
 
 /*Resize the wrap to see the search bar change!*/

@@ -11,6 +11,7 @@ var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
 var sidebarVisible = false;
+var allFacultiesSelected = true;
 
 d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
   csv_data.forEach(function(student) {
@@ -55,6 +56,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkAll() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.selectAll(".myCheckbox").property("checked", true);
+      allFacultiesSelected = true;
     } else {
       d3.selectAll(".myCheckbox").property("checked", false);
     }
@@ -64,8 +66,12 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkSingle() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", false);
+      allFacultiesSelected = false;
     } else if (d3.selectAll(".myCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", true);
+      allFacultiesSelected = true;
+    } else {
+      allFacultiesSelected = false;
     }
     update();
   }
@@ -222,7 +228,7 @@ function initializeStudentCountGraph() {
       bottom: 50,
       left: 50
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
+    width = (window.innerWidth - margin.left - margin.right) / 3 + 200,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   svg = d3v5.select(".linegraph").append("svg")
@@ -243,6 +249,47 @@ function initializeStudentCountGraph() {
   // Add the Y Axis
   svg.append("g")
     .attr("class", "y axis")
+<<<<<<< HEAD
+=======
+
+  // X axis label
+  svg.append("text")
+    .attr("class","axis label")
+    .attr("text-anchor", "end")
+    .attr("x", width - 200)
+    .attr("y", height + margin.top - 10)
+    .text("Year");
+
+  // Y axis label
+  svg.append("text")
+    .attr("class","axis label")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 10)
+    .attr("x", -margin.top + 30)
+    .text("Student count")
+
+  // Graph title
+  svg.append("text")
+      .attr("class","axis title")
+      .attr("x", (width / 2))             
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "end")  
+      .text("Student count per year");
+
+  // Legend
+  svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(30," + i * 19 + ")";
+    });
+
+  // Nodes
+  svg.append("g")
+    .attr("class", "dot")
+
+  updateStudentCountGraph(begin,end);
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -257,19 +304,25 @@ function updateStudentCountGraph(begin, end) {
 
   //number of datapoints
   var n = end - begin;
-  var yearlyCount;
-  switch (view) {
-    case 'world':
-      yearlyCount = getStudentCountPerYearTotal();
-      break;
-    case 'country':
-      yearlyCount = getStudentCountPerYearCountry(selectedCountry);
-      break;
-    case 'university':
-      yearlyCount = getStudentCountPerYearUniversity(selectedUniversity.name);
-      break;
-    default:
-      yearlyCount = getStudentCountPerYearTotal();
+
+  var range;
+  var lineData = [];
+  if(allFacultiesSelected) {
+    var yearlyCount = getYearlyCount(selectedData);
+    range = yearlyCount;
+    lineData.push({key:'Total',value:yearlyCount});
+  } else {
+    var faculties = getSelectedFaculties();
+    var highestCount = 0;
+    for(i=0;i<faculties.length;i++){
+      var facultyData = updateSelectedData(selectedData,yearSelected[0],yearSelected[1],[faculties[i]]);
+      var yearlyCount = getYearlyCount(facultyData);
+      lineData.push({key:faculties[i],value:yearlyCount});
+      if(getHighestCount(yearlyCount) > highestCount){
+        range = yearlyCount;
+        highestCount = getHighestCount(yearlyCount);
+      }
+    }
   }
 
   // Set the ranges
@@ -284,8 +337,34 @@ function updateStudentCountGraph(begin, end) {
   var xAxis = d3v5.axisBottom(x)
     .ticks(n)
     .tickFormat(d3.format("d"));
+<<<<<<< HEAD
   var yAxis = d3v5.axisLeft(y).ticks(yTicks.count);
+=======
+  var yAxis = d3v5.axisLeft(y)
+    .tickFormat(d3.format("d"));
 
+  // Scale the range of the data
+  x.domain(d3v5.extent(range, function(d) {
+    return d.key;
+  }));
+  y.domain([0, d3v5.max(range, function(d) {
+    return d.values;
+  })]);
+
+  svg.select(".y.axis")
+    .call(yAxis);
+  svg.select(".x.axis")
+    .call(xAxis);
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
+
+  //svg.data(lineData)
+
+  updateLines(lineData,x,y);
+  updateLegend(lineData,width);
+  updateNodes(lineData, x, y);
+}
+
+function updateLines(data,x,y) {
   // Define the line
   var valueline = d3v5.line()
     .x(function(d) {
@@ -296,20 +375,103 @@ function updateStudentCountGraph(begin, end) {
     })
     .curve(d3v5.curveMonotoneX);
 
+<<<<<<< HEAD
   // Scale the range of the data
   x.domain(d3v5.extent(yearlyCount, function(d) {
     return d.key;
   }));
   y.domain([0, yTicks.endPoint]);
+=======
+  var lines = svg.selectAll(".line")
+    .data(data);
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
-  svg.select(".line")
-    .attr("d", valueline(yearlyCount));
-  svg.select(".y.axis")
-    .call(yAxis);
-  svg.select(".x.axis")
-    .call(xAxis);
+  lines.exit()
+    .attr("class", "line")
+    .remove();
 
-  updateNodes(yearlyCount, x, y);
+  lines.attr("class", "line")
+    .style("stroke", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
+    .attr("d", function(d) {
+      return valueline(d.value)
+    });
+
+  lines.enter().append("path")
+    .attr("class","line")
+    .style("stroke", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
+    .attr("d", function(d) {
+      return valueline(d.value)
+    });
+}
+
+function updateLegend(data,width){
+  var legend = svg.select("g.legend");
+  
+  var rect = legend.selectAll(".legend.rect")
+    .data(data);
+
+  var text = legend.selectAll(".legend.text")
+    .data(data);
+
+  rect.exit()
+    .attr("class","legend rect")
+    .remove()
+
+  text.exit()
+    .attr("class","legend text")
+    .remove()
+
+  rect.attr("class","legend rect")
+    .attr("x", width - 18)
+    .attr("y", function (d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key)
+    });
+  
+  text.attr("class","legend text")
+    .attr("x", width + 5)
+    .attr("y", function (d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
+    });
+
+  rect.enter().append("rect")
+    .attr("class","legend rect")
+    .attr("x", width - 18)
+    .attr("y", function (d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key)
+    });
+
+  text.enter().append("text")
+    .attr("class","legend text")
+    .attr("x", width + 5)
+    .attr("y", function (d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
+    });
 }
 
 function updateNodes(data, x, y) {
@@ -322,8 +484,10 @@ function updateNodes(data, x, y) {
     .duration(750);
 
   // JOIN new data with old elements.
-  var nodes = svg.selectAll(".dot")
-    .data(data);
+  var nodes = svg.select("g.dot")
+    .data(data)
+    .selectAll("circle")
+    .data(function(d) { return d.value; })
 
   // EXIT old elements not present in new data.
   nodes.exit()
@@ -332,23 +496,30 @@ function updateNodes(data, x, y) {
 
   // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .attr("cx", function(d) {
+    .attr("cx", function(d,i) {
       return x(d.key)
     })
-    .attr("cy", function(d) {
+    .attr("cy", function(d,i) {
       return y(d.values)
     })
+<<<<<<< HEAD
+=======
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })            
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
     .attr("class", "dot")
-    .attr("cx", function(d) {
+    .attr("cx", function(d,i) {
       return x(d.key)
     })
-    .attr("cy", function(d) {
+    .attr("cy", function(d,i) {
       return y(d.values)
     })
     .attr("r", 5)
+<<<<<<< HEAD
     .on("mouseover", function(d) {
       div.transition()
         .duration(200)
@@ -362,6 +533,24 @@ function updateNodes(data, x, y) {
         .duration(500)
         .style("opacity", 0);
     });
+=======
+    .style("fill", function(d,i) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
+    .on("mouseover", function(d,i) {		
+      div.transition()		
+          .duration(200)		
+          .style("opacity", .9);		
+      div.html(d.values+" students")	
+          .style("left", (d3v5.event.pageX) + "px")		
+          .style("top", (d3v5.event.pageY - 28) + "px");
+      })					
+      .on("mouseout", function(d) {		
+          div.transition()		
+              .duration(500)		
+              .style("opacity", 0);	
+      });
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   nodes.transition(t);
 }
@@ -376,7 +565,7 @@ function initializeFacultyGraph() {
     width = (window.innerWidth - margin.left - margin.right) / 3,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
-  svgBar = d3v5.select("body").append("svg")
+  svgBar = d3v5.select(".stackedbarchart").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -714,14 +903,12 @@ function zoomToCountry(country, coordinates, dataset) {
     for (i = 0; i < countryStudentCount.length; i++) {
       //TODO: echte coordinaten gebruiken
       var coordinates = getRandomCoordinates(countryData.latlng[0], countryData.latlng[1], 2);
-      //bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
       bubbles.push({
         name: countryStudentCount[i].key,
         latitude: coordinates[0],
         longitude: coordinates[1],
         radius: 10,
         fillKey: countryStudentCount[i].key,
-        //color: paletteScale(countryStudentCount[i].values)
         numberOfStudents: datasetZoom[countryStudentCount[i].key].numberOfStudents
       });
     };
@@ -775,7 +962,7 @@ function countStudentsCountry(dataset, country) {
 }
 
 
-function getStudentCountPerYearTotal() {
+function getStudentCountPerYearTotal(data) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Begin;
@@ -783,11 +970,11 @@ function getStudentCountPerYearTotal() {
     .rollup(function(leaves) {
       return leaves.length;
     })
-    .entries(selectedData);
+    .entries(data);
   return yearlyCount;
 }
 
-function getStudentCountPerYearCountry(country) {
+function getStudentCountPerYearCountry(data,country) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -798,14 +985,14 @@ function getStudentCountPerYearCountry(country) {
     .rollup(function(leaves) {
       return leaves.length;
     })
-    .entries(selectedData);
+    .entries(data);
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
   }).values;
   return yearlyCountPerCountry;
 }
 
-function getStudentCountPerYearUniversity(university) {
+function getStudentCountPerYearUniversity(data,university) {
   var studentCount = d3.nest()
     .key(function(d) {
       return d.Uitwisselingsinstelling;
@@ -816,7 +1003,7 @@ function getStudentCountPerYearUniversity(university) {
     .rollup(function(leaves) {
       return leaves.length;
     })
-    .entries(selectedData);
+    .entries(data);
   var yearlyCountPerUniversity = studentCount.find(obj => {
     return obj.key === university;
   }).values;
@@ -867,7 +1054,11 @@ function getStudentCountPerFacultyCountry(country) {
     .rollup(function(leaves) {
       return leaves.length;
     })
+<<<<<<< HEAD
     .entries(selectedData)
+=======
+    .entries(selectedData);
+>>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
   }).values.map(function(d, i) {
@@ -987,4 +1178,64 @@ function getSmartTicks(val) {
     endPoint: slicesCount * step,
     count: Math.min(10, slicesCount) //show max 10 ticks
   }
+}
+
+function getYearlyCount(data){
+  var yearlyCount;
+  switch (view) {
+    case 'world':
+      yearlyCount = getStudentCountPerYearTotal(data);
+      break;
+    case 'country':
+      yearlyCount = getStudentCountPerYearCountry(data,selectedCountry);
+      break;
+    case 'university':
+      console.log(selectedUniversity.name);
+      yearlyCount = getStudentCountPerYearUniversity(data,selectedUniversity.name);
+      break;
+    default:
+      yearlyCount = getStudentCountPerYearTotal(data);
+    }
+  return yearlyCount;
+}
+
+function getHighestCount(yearlyCount){
+  var highestCount = 0;
+  for(year in yearlyCount){
+    if(yearlyCount[year].values > highestCount){
+      highestCount = yearlyCount[year].values;
+    }
+  }
+  return highestCount;
+}
+
+//TODO
+function getFacultyColors(){
+  var faculties = [
+    "Total",
+    "Fac. Psychologie en Pedagogische Wet.", 
+    "Faculteit Geneeskunde", 
+    "Faculteit Rechtsgeleerdheid", 
+    "Faculteit Economie en Bedrijfswetensch.", 
+    "Faculteit Ingenieurswetenschappen", 
+    "Faculteit Letteren", 
+    "Faculteit Wetenschappen", 
+    "Faculteit Farmaceutische Wetenschappen", 
+    "Faculteit Theologie en Religiewetensch.", 
+    "Hoger Instituut voor Wijsbegeerte", 
+    "FaBeR", 
+    "Faculteit Sociale Wetenschappen", 
+    "Faculteit Bio-ingenieurswetenschappen", 
+    "Fac. Industriële Ingenieurswetenschappen", 
+    "Faculteit Architectuur"
+  ]
+
+  /*var color = d3.scale.ordinal()
+    .domain(faculties)
+    .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
+
+  var color = d3v5.scaleOrdinal().domain(faculties)
+  .range(d3v5.schemeSet3);
+
+  return color;
 }
