@@ -695,8 +695,8 @@ function updateFacultyGraph() {
       tooltip.style("display", "none");
     })
     .on("mousemove", function(d) {
-      var xPosition = d3v5.mouse(this)[0] - 35;
-      var yPosition = d3v5.mouse(this)[1];
+      var xPosition = d3v5.mouse(this)[0] - 15;
+      var yPosition = d3v5.mouse(this)[1] - 25;
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
       tooltip.select("text").text(d.y);
     })
