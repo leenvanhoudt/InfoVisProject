@@ -252,7 +252,7 @@ function initializeStudentCountGraph() {
 
   // X axis label
   svg.append("text")
-    .attr("class","axis label")
+    .attr("class", "axis label")
     .attr("text-anchor", "end")
     .attr("x", width - 200)
     .attr("y", height + margin.top - 10)
@@ -260,7 +260,7 @@ function initializeStudentCountGraph() {
 
   // Y axis label
   svg.append("text")
-    .attr("class","axis label")
+    .attr("class", "axis label")
     .attr("text-anchor", "end")
     .attr("transform", "rotate(-90)")
     .attr("y", -margin.left + 10)
@@ -269,11 +269,11 @@ function initializeStudentCountGraph() {
 
   // Graph title
   svg.append("text")
-      .attr("class","axis title")
-      .attr("x", (width / 2))             
-      .attr("y", 0 - (margin.top / 2))
-      .attr("text-anchor", "end")  
-      .text("Student count per year");
+    .attr("class", "axis title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "end")
+    .text("Student count per year");
 
   // Legend
   svg.append("g")
@@ -286,7 +286,7 @@ function initializeStudentCountGraph() {
   svg.append("g")
     .attr("class", "dot")
 
-  updateStudentCountGraph(begin,end);
+  updateStudentCountGraph(begin, end);
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -304,18 +304,24 @@ function updateStudentCountGraph(begin, end) {
 
   var range;
   var lineData = [];
-  if(allFacultiesSelected) {
+  if (allFacultiesSelected) {
     var yearlyCount = getYearlyCount(selectedData);
     range = yearlyCount;
-    lineData.push({key:'Total',value:yearlyCount});
+    lineData.push({
+      key: 'Total',
+      value: yearlyCount
+    });
   } else {
     var faculties = getSelectedFaculties();
     var highestCount = 0;
-    for(i=0;i<faculties.length;i++){
-      var facultyData = updateSelectedData(selectedData,yearSelected[0],yearSelected[1],[faculties[i]]);
+    for (i = 0; i < faculties.length; i++) {
+      var facultyData = updateSelectedData(selectedData, yearSelected[0], yearSelected[1], [faculties[i]]);
       var yearlyCount = getYearlyCount(facultyData);
-      lineData.push({key:faculties[i],value:yearlyCount});
-      if(getHighestCount(yearlyCount) > highestCount){
+      lineData.push({
+        key: faculties[i],
+        value: yearlyCount
+      });
+      if (getHighestCount(yearlyCount) > highestCount) {
         range = yearlyCount;
         highestCount = getHighestCount(yearlyCount);
       }
@@ -326,7 +332,7 @@ function updateStudentCountGraph(begin, end) {
   var x = d3v5.scaleLinear().range([0, width]);
   var y = d3v5.scaleLinear().range([height, 0]);
 
-  var yTicks = getSmartTicks(d3v5.max(yearlyCount, function(d) {
+  var yTicks = getSmartTicks(d3v5.max(range, function(d) {
     return d.values;
   }), height);
 
@@ -335,15 +341,14 @@ function updateStudentCountGraph(begin, end) {
     .ticks(n)
     .tickFormat(d3.format("d"));
   var yAxis = d3v5.axisLeft(y)
+    .ticks(yTicks.count)
     .tickFormat(d3.format("d"));
 
   // Scale the range of the data
   x.domain(d3v5.extent(range, function(d) {
     return d.key;
   }));
-  y.domain([0, d3v5.max(range, function(d) {
-    return d.values;
-  })]);
+  y.domain([0, yTicks.endPoint]);
 
   svg.select(".y.axis")
     .call(yAxis);
@@ -352,12 +357,12 @@ function updateStudentCountGraph(begin, end) {
 
   //svg.data(lineData)
 
-  updateLines(lineData,x,y);
-  updateLegend(lineData,width);
+  updateLines(lineData, x, y);
+  updateLegend(lineData, width);
   updateNodes(lineData, x, y);
 }
 
-function updateLines(data,x,y) {
+function updateLines(data, x, y) {
   // Define the line
   var valueline = d3v5.line()
     .x(function(d) {
@@ -378,24 +383,26 @@ function updateLines(data,x,y) {
   lines.attr("class", "line")
     .style("stroke", function(d) {
       var colorScale = getFacultyColors();
-      return colorScale(d.key); })
+      return colorScale(d.key);
+    })
     .attr("d", function(d) {
       return valueline(d.value)
     });
 
   lines.enter().append("path")
-    .attr("class","line")
+    .attr("class", "line")
     .style("stroke", function(d) {
       var colorScale = getFacultyColors();
-      return colorScale(d.key); })
+      return colorScale(d.key);
+    })
     .attr("d", function(d) {
       return valueline(d.value)
     });
 }
 
-function updateLegend(data,width){
+function updateLegend(data, width) {
   var legend = svg.select("g.legend");
-  
+
   var rect = legend.selectAll(".legend.rect")
     .data(data);
 
@@ -403,16 +410,16 @@ function updateLegend(data,width){
     .data(data);
 
   rect.exit()
-    .attr("class","legend rect")
+    .attr("class", "legend rect")
     .remove()
 
   text.exit()
-    .attr("class","legend text")
+    .attr("class", "legend text")
     .remove()
 
-  rect.attr("class","legend rect")
+  rect.attr("class", "legend rect")
     .attr("x", width - 18)
-    .attr("y", function (d, i) {
+    .attr("y", function(d, i) {
       return i * 20;
     })
     .attr("width", 18)
@@ -421,10 +428,10 @@ function updateLegend(data,width){
       var colorScale = getFacultyColors();
       return colorScale(d.key)
     });
-  
-  text.attr("class","legend text")
+
+  text.attr("class", "legend text")
     .attr("x", width + 5)
-    .attr("y", function (d, i) {
+    .attr("y", function(d, i) {
       return i * 20 + 9;
     })
     .attr("dy", ".35em")
@@ -434,9 +441,9 @@ function updateLegend(data,width){
     });
 
   rect.enter().append("rect")
-    .attr("class","legend rect")
+    .attr("class", "legend rect")
     .attr("x", width - 18)
-    .attr("y", function (d, i) {
+    .attr("y", function(d, i) {
       return i * 20;
     })
     .attr("width", 18)
@@ -447,9 +454,9 @@ function updateLegend(data,width){
     });
 
   text.enter().append("text")
-    .attr("class","legend text")
+    .attr("class", "legend text")
     .attr("x", width + 5)
-    .attr("y", function (d, i) {
+    .attr("y", function(d, i) {
       return i * 20 + 9;
     })
     .attr("dy", ".35em")
@@ -472,7 +479,9 @@ function updateNodes(data, x, y) {
   var nodes = svg.select("g.dot")
     .data(data)
     .selectAll("circle")
-    .data(function(d) { return d.value; })
+    .data(function(d) {
+      return d.value;
+    })
 
   // EXIT old elements not present in new data.
   nodes.exit()
@@ -481,42 +490,44 @@ function updateNodes(data, x, y) {
 
   // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .attr("cx", function(d,i) {
+    .attr("cx", function(d, i) {
       return x(d.key)
     })
-    .attr("cy", function(d,i) {
+    .attr("cy", function(d, i) {
       return y(d.values)
     })
     .style("fill", function(d) {
       var colorScale = getFacultyColors();
-      return colorScale(d.key); })            
+      return colorScale(d.key);
+    })
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
     .attr("class", "dot")
-    .attr("cx", function(d,i) {
+    .attr("cx", function(d, i) {
       return x(d.key)
     })
-    .attr("cy", function(d,i) {
+    .attr("cy", function(d, i) {
       return y(d.values)
     })
     .attr("r", 5)
-    .style("fill", function(d,i) {
+    .style("fill", function(d, i) {
       var colorScale = getFacultyColors();
-      return colorScale(d.key); })
-    .on("mouseover", function(d,i) {		
-      div.transition()		
-          .duration(200)		
-          .style("opacity", .9);		
-      div.html(d.values+" students")	
-          .style("left", (d3v5.event.pageX) + "px")		
-          .style("top", (d3v5.event.pageY - 28) + "px");
-      })					
-      .on("mouseout", function(d) {		
-          div.transition()		
-              .duration(500)		
-              .style("opacity", 0);	
-      });
+      return colorScale(d.key);
+    })
+    .on("mouseover", function(d, i) {
+      div.transition()
+        .duration(200)
+        .style("opacity", .9);
+      div.html(d.values + " students")
+        .style("left", (d3v5.event.pageX) + "px")
+        .style("top", (d3v5.event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(d) {
+      div.transition()
+        .duration(500)
+        .style("opacity", 0);
+    });
 
   nodes.transition(t);
 }
@@ -574,8 +585,7 @@ function updateFacultyGraph() {
     return facultyCount.map(function(d) {
       return {
         x: d.faculty,
-        y: +d[year] || +0,
-        sum: d3.sum(d3.values(d))
+        y: +d[year] || +0
       };
     });
   }));
@@ -680,18 +690,11 @@ function updateFacultyGraph() {
     .attr("width", x.rangeBand())
     .on("mouseover", function(d) {
       tooltip.style("display", null);
-      tooltip2.style("display", null);
-
-      var xPos = x(d.x) + 3;
-      var yPos = y(d.sum) - 20;
-      tooltip2.attr("transform", "translate(" + xPos + "," + yPos + ")");
-      tooltip2.select("text").text(d.sum);
     })
     .on("mouseout", function() {
       tooltip.style("display", "none");
-      tooltip2.style("display", "none");
     })
-    .on("mousemove", function(d){
+    .on("mousemove", function(d) {
       var xPosition = d3v5.mouse(this)[0] - 35;
       var yPosition = d3v5.mouse(this)[1];
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
@@ -746,22 +749,6 @@ function updateFacultyGraph() {
     .attr("font-size", "12px")
     .attr("font-weight", "bold");
 
-  var tooltip2 = svgBar.append("g")
-    .attr("class", "tooltip")
-    .style("display", "none");
-
-  tooltip2.append("rect")
-    .attr("width", 30)
-    .attr("height", 20)
-    .attr("fill", "white")
-    .style("opacity", 0.5);
-
-  tooltip2.append("text")
-    .attr("x", 15)
-    .attr("dy", "1.2em")
-    .style("text-anchor", "middle")
-    .attr("font-size", "12px")
-    .attr("font-weight", "bold");
 }
 
 function zoomToCountry(country, coordinates, dataset) {
@@ -900,6 +887,7 @@ function zoomToCountry(country, coordinates, dataset) {
       view = 'university';
       selectedUniversity = bubble;
       updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+      updateFacultyGraph();
       updateText(yearSelected[0], yearSelected[1], bubble.numberOfStudents);
       document.getElementById('universityName').innerHTML = bubble.name;
     });
@@ -940,7 +928,7 @@ function getStudentCountPerYearTotal(data) {
   return yearlyCount;
 }
 
-function getStudentCountPerYearCountry(data,country) {
+function getStudentCountPerYearCountry(data, country) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -958,7 +946,7 @@ function getStudentCountPerYearCountry(data,country) {
   return yearlyCountPerCountry;
 }
 
-function getStudentCountPerYearUniversity(data,university) {
+function getStudentCountPerYearUniversity(data, university) {
   var studentCount = d3.nest()
     .key(function(d) {
       return d.Uitwisselingsinstelling;
@@ -1036,20 +1024,35 @@ function getStudentCountPerFacultyCountry(country) {
 }
 
 function getStudentCountPerFacultyUniversity(university) {
-  var studentCount = d3.nest()
+  var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Uitwisselingsinstelling;
     })
     .key(function(d) {
-      return d.Faculteit;
+      var newFac = d.Faculteit.replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      return newFac;
+    })
+    .key(function(d) {
+      return d.Begin;
     })
     .rollup(function(leaves) {
       return leaves.length;
     })
     .entries(selectedData);
-  var yearlyCountPerUniversity = studentCount.find(obj => {
+
+  var yearlyCountPerUniversity = yearlyCount.find(obj => {
     return obj.key === university;
-  }).values;
+  }).values.map(function(d, i) {
+    var result = {
+      faculty: d.key
+    }
+    d.values.forEach(function(year) {
+      result[year.key] = year.values;
+    })
+    return result
+  });;
   return yearlyCountPerUniversity;
 }
 
@@ -1142,29 +1145,28 @@ function getSmartTicks(val) {
   }
 }
 
-function getYearlyCount(data){
+function getYearlyCount(data) {
   var yearlyCount;
   switch (view) {
     case 'world':
       yearlyCount = getStudentCountPerYearTotal(data);
       break;
     case 'country':
-      yearlyCount = getStudentCountPerYearCountry(data,selectedCountry);
+      yearlyCount = getStudentCountPerYearCountry(data, selectedCountry);
       break;
     case 'university':
-      console.log(selectedUniversity.name);
-      yearlyCount = getStudentCountPerYearUniversity(data,selectedUniversity.name);
+      yearlyCount = getStudentCountPerYearUniversity(data, selectedUniversity.name);
       break;
     default:
       yearlyCount = getStudentCountPerYearTotal(data);
-    }
+  }
   return yearlyCount;
 }
 
-function getHighestCount(yearlyCount){
+function getHighestCount(yearlyCount) {
   var highestCount = 0;
-  for(year in yearlyCount){
-    if(yearlyCount[year].values > highestCount){
+  for (year in yearlyCount) {
+    if (yearlyCount[year].values > highestCount) {
       highestCount = yearlyCount[year].values;
     }
   }
@@ -1172,23 +1174,23 @@ function getHighestCount(yearlyCount){
 }
 
 //TODO
-function getFacultyColors(){
+function getFacultyColors() {
   var faculties = [
     "Total",
-    "Fac. Psychologie en Pedagogische Wet.", 
-    "Faculteit Geneeskunde", 
-    "Faculteit Rechtsgeleerdheid", 
-    "Faculteit Economie en Bedrijfswetensch.", 
-    "Faculteit Ingenieurswetenschappen", 
-    "Faculteit Letteren", 
-    "Faculteit Wetenschappen", 
-    "Faculteit Farmaceutische Wetenschappen", 
-    "Faculteit Theologie en Religiewetensch.", 
-    "Hoger Instituut voor Wijsbegeerte", 
-    "FaBeR", 
-    "Faculteit Sociale Wetenschappen", 
-    "Faculteit Bio-ingenieurswetenschappen", 
-    "Fac. Industriële Ingenieurswetenschappen", 
+    "Fac. Psychologie en Pedagogische Wet.",
+    "Faculteit Geneeskunde",
+    "Faculteit Rechtsgeleerdheid",
+    "Faculteit Economie en Bedrijfswetensch.",
+    "Faculteit Ingenieurswetenschappen",
+    "Faculteit Letteren",
+    "Faculteit Wetenschappen",
+    "Faculteit Farmaceutische Wetenschappen",
+    "Faculteit Theologie en Religiewetensch.",
+    "Hoger Instituut voor Wijsbegeerte",
+    "FaBeR",
+    "Faculteit Sociale Wetenschappen",
+    "Faculteit Bio-ingenieurswetenschappen",
+    "Fac. Industriële Ingenieurswetenschappen",
     "Faculteit Architectuur"
   ]
 
@@ -1197,7 +1199,7 @@ function getFacultyColors(){
     .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
 
   var color = d3v5.scaleOrdinal().domain(faculties)
-  .range(d3v5.schemeSet3);
+    .range(d3v5.schemeSet3);
 
   return color;
 }
