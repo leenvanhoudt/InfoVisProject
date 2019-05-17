@@ -44,7 +44,6 @@ pointer-events: all;
 
 /* Style the dots by assigning a fill and stroke */
 .dot {
-  fill: #3FB8AF;
   stroke: #fff;
 }
 

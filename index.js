@@ -312,7 +312,7 @@ function updateStudentCountGraph(begin, end) {
       value: yearlyCount
     });
   } else {
-    var faculties = getSelectedFaculties();
+    var faculties = getSelectedFaculties(false);
     var highestCount = 0;
     for (i = 0; i < faculties.length; i++) {
       var facultyData = updateSelectedData(selectedData, yearSelected[0], yearSelected[1], [faculties[i]]);
@@ -475,46 +475,51 @@ function updateNodes(data, x, y) {
   var t = d3.transition()
     .duration(750);
 
-  // JOIN new data with old elements.
-  var nodes = svg.select("g.dot")
+  var nodes = svg.selectAll("g.dot")
     .data(data)
-    .selectAll("circle")
-    .data(function(d) {
-      return d.value;
-    })
 
-  // EXIT old elements not present in new data.
   nodes.exit()
     .attr("class", "dot")
     .remove();
 
-  // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .attr("cx", function(d, i) {
-      return x(d.key)
-    })
-    .attr("cy", function(d, i) {
-      return y(d.values)
-    })
     .style("fill", function(d) {
       var colorScale = getFacultyColors();
       return colorScale(d.key);
-    })
+    });
 
-  // ENTER new elements present in new data.
-  nodes.enter().append("circle")
+  var merge = nodes.enter().append("g")
     .attr("class", "dot")
-    .attr("cx", function(d, i) {
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key);
+    });
+
+  var circles = merge.merge(nodes)
+    .selectAll("circle")
+    .data(function(d) { return d.value; })
+
+  circles.exit()
+    .attr("class", "dot")
+    .remove();
+
+  circles.attr("class", "dot")
+    .attr("cx", function(d) {
       return x(d.key)
     })
-    .attr("cy", function(d, i) {
+    .attr("cy", function(d) {
+      return y(d.values)
+    })
+
+  circles.enter().append("circle")
+    .attr("class", "dot")
+    .attr("cx", function(d) {
+      return x(d.key)
+    })
+    .attr("cy", function(d) {
       return y(d.values)
     })
     .attr("r", 5)
-    .style("fill", function(d, i) {
-      var colorScale = getFacultyColors();
-      return colorScale(d.key);
-    })
     .on("mouseover", function(d, i) {
       div.transition()
         .duration(200)
@@ -695,8 +700,8 @@ function updateFacultyGraph() {
       tooltip.style("display", "none");
     })
     .on("mousemove", function(d) {
-      var xPosition = d3v5.mouse(this)[0] - 15;
-      var yPosition = d3v5.mouse(this)[1] - 25;
+      var xPosition = d3v5.mouse(this)[0] - 35;
+      var yPosition = d3v5.mouse(this)[1];
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
       tooltip.select("text").text(d.y);
     })
