@@ -249,8 +249,6 @@ function initializeStudentCountGraph() {
   // Add the Y Axis
   svg.append("g")
     .attr("class", "y axis")
-<<<<<<< HEAD
-=======
 
   // X axis label
   svg.append("text")
@@ -289,7 +287,6 @@ function initializeStudentCountGraph() {
     .attr("class", "dot")
 
   updateStudentCountGraph(begin,end);
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 }
 
 function updateStudentCountGraph(begin, end) {
@@ -337,9 +334,6 @@ function updateStudentCountGraph(begin, end) {
   var xAxis = d3v5.axisBottom(x)
     .ticks(n)
     .tickFormat(d3.format("d"));
-<<<<<<< HEAD
-  var yAxis = d3v5.axisLeft(y).ticks(yTicks.count);
-=======
   var yAxis = d3v5.axisLeft(y)
     .tickFormat(d3.format("d"));
 
@@ -355,7 +349,6 @@ function updateStudentCountGraph(begin, end) {
     .call(yAxis);
   svg.select(".x.axis")
     .call(xAxis);
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   //svg.data(lineData)
 
@@ -375,16 +368,8 @@ function updateLines(data,x,y) {
     })
     .curve(d3v5.curveMonotoneX);
 
-<<<<<<< HEAD
-  // Scale the range of the data
-  x.domain(d3v5.extent(yearlyCount, function(d) {
-    return d.key;
-  }));
-  y.domain([0, yTicks.endPoint]);
-=======
   var lines = svg.selectAll(".line")
     .data(data);
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   lines.exit()
     .attr("class", "line")
@@ -502,12 +487,9 @@ function updateNodes(data, x, y) {
     .attr("cy", function(d,i) {
       return y(d.values)
     })
-<<<<<<< HEAD
-=======
     .style("fill", function(d) {
       var colorScale = getFacultyColors();
       return colorScale(d.key); })            
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
@@ -519,21 +501,6 @@ function updateNodes(data, x, y) {
       return y(d.values)
     })
     .attr("r", 5)
-<<<<<<< HEAD
-    .on("mouseover", function(d) {
-      div.transition()
-        .duration(200)
-        .style("opacity", .9);
-      div.html(d.values + " students")
-        .style("left", (d3v5.event.pageX) + "px")
-        .style("top", (d3v5.event.pageY - 28) + "px");
-    })
-    .on("mouseout", function(d) {
-      div.transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
-=======
     .style("fill", function(d,i) {
       var colorScale = getFacultyColors();
       return colorScale(d.key); })
@@ -550,7 +517,6 @@ function updateNodes(data, x, y) {
               .duration(500)		
               .style("opacity", 0);	
       });
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
 
   nodes.transition(t);
 }
@@ -1054,11 +1020,7 @@ function getStudentCountPerFacultyCountry(country) {
     .rollup(function(leaves) {
       return leaves.length;
     })
-<<<<<<< HEAD
-    .entries(selectedData)
-=======
     .entries(selectedData);
->>>>>>> 27ce383cf3f5e91cfeeedb9437549841fbdfe824
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
   }).values.map(function(d, i) {
