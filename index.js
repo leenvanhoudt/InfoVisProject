@@ -14,7 +14,6 @@ var sidebarVisible = false;
 var allFacultiesSelected = true;
 
 d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", function(error, csv_data) {
-  console.log(getFacultyColors());
   csv_data.forEach(function(student) {
     student.Begin = parseInt(student.Begin);
     student.Eind = parseInt(student.Eind);
@@ -229,7 +228,7 @@ function initializeStudentCountGraph(begin, end) {
       bottom: 50,
       left: 50
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
+    width = (window.innerWidth - margin.left - margin.right) / 3 + 200,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   svg = d3v5.select(".linegraph").append("svg")
@@ -250,6 +249,42 @@ function initializeStudentCountGraph(begin, end) {
   // Add the Y Axis
   svg.append("g")
     .attr("class", "y axis")
+
+  // X axis label
+  svg.append("text")
+    .attr("class","axis label")
+    .attr("text-anchor", "end")
+    .attr("x", width - 200)
+    .attr("y", height + margin.top - 10)
+    .text("Year");
+
+  // Y axis label
+  svg.append("text")
+    .attr("class","axis label")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 10)
+    .attr("x", -margin.top + 30)
+    .text("Student count")
+
+  // Graph title
+  svg.append("text")
+      .attr("class","axis title")
+      .attr("x", (width / 2))             
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "end")  
+      .text("Student count per year");
+
+  // Legend
+  svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(30," + i * 19 + ")";
+    });
+
+  // Nodes
+  svg.append("g")
+    .attr("class", "dot")
 
   updateStudentCountGraph(begin,end);
 }
@@ -279,7 +314,7 @@ function updateStudentCountGraph(begin, end) {
     for(i=0;i<faculties.length;i++){
       var facultyData = updateSelectedData(selectedData,yearSelected[0],yearSelected[1],[faculties[i]]);
       var yearlyCount = getYearlyCount(facultyData);
-      lineData.push({key:'Total',value:yearlyCount});
+      lineData.push({key:faculties[i],value:yearlyCount});
       if(getHighestCount(yearlyCount) > highestCount){
         range = yearlyCount;
         highestCount = getHighestCount(yearlyCount);
@@ -295,7 +330,8 @@ function updateStudentCountGraph(begin, end) {
   var xAxis = d3v5.axisBottom(x)
     .ticks(n)
     .tickFormat(d3.format("d"));
-  var yAxis = d3v5.axisLeft(y);
+  var yAxis = d3v5.axisLeft(y)
+    .tickFormat(d3.format("d"));
 
   // Scale the range of the data
   x.domain(d3v5.extent(range, function(d) {
@@ -310,8 +346,11 @@ function updateStudentCountGraph(begin, end) {
   svg.select(".x.axis")
     .call(xAxis);
 
+  //svg.data(lineData)
+
   updateLines(lineData,x,y);
-  updateNodes(yearlyCount, x, y);
+  updateLegend(lineData,width);
+  updateNodes(lineData, x, y);
 }
 
 function updateLines(data,x,y) {
@@ -333,17 +372,86 @@ function updateLines(data,x,y) {
     .remove();
 
   lines.attr("class", "line")
+    .style("stroke", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
     .attr("d", function(d) {
       return valueline(d.value)
     });
 
   lines.enter().append("path")
     .attr("class","line")
-    //TODO
     .style("stroke", function(d) {
-      return d.color = getFacultyColors()(d.key); })
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
     .attr("d", function(d) {
       return valueline(d.value)
+    });
+}
+
+function updateLegend(data,width){
+  var legend = svg.select("g.legend");
+  
+  var rect = legend.selectAll(".legend.rect")
+    .data(data);
+
+  var text = legend.selectAll(".legend.text")
+    .data(data);
+
+  rect.exit()
+    .attr("class","legend rect")
+    .remove()
+
+  text.exit()
+    .attr("class","legend text")
+    .remove()
+
+  rect.attr("class","legend rect")
+    .attr("x", width - 18)
+    .attr("y", function (d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key)
+    });
+  
+  text.attr("class","legend text")
+    .attr("x", width + 5)
+    .attr("y", function (d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
+    });
+
+  rect.enter().append("rect")
+    .attr("class","legend rect")
+    .attr("x", width - 18)
+    .attr("y", function (d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key)
+    });
+
+  text.enter().append("text")
+    .attr("class","legend text")
+    .attr("x", width + 5)
+    .attr("y", function (d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
     });
 }
 
@@ -357,8 +465,10 @@ function updateNodes(data, x, y) {
     .duration(750);
 
   // JOIN new data with old elements.
-  var nodes = svg.selectAll(".dot")
-    .data(data);
+  var nodes = svg.select("g.dot")
+    .data(data)
+    .selectAll("circle")
+    .data(function(d) { return d.value; })
 
   // EXIT old elements not present in new data.
   nodes.exit()
@@ -367,24 +477,30 @@ function updateNodes(data, x, y) {
 
   // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .attr("cx", function(d) {
+    .attr("cx", function(d,i) {
       return x(d.key)
     })
-    .attr("cy", function(d) {
+    .attr("cy", function(d,i) {
       return y(d.values)
-    })                 
+    })
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })            
 
   // ENTER new elements present in new data.
   nodes.enter().append("circle")
     .attr("class", "dot")
-    .attr("cx", function(d) {
+    .attr("cx", function(d,i) {
       return x(d.key)
     })
-    .attr("cy", function(d) {
+    .attr("cy", function(d,i) {
       return y(d.values)
     })
     .attr("r", 5)
-    .on("mouseover", function(d) {		
+    .style("fill", function(d,i) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key); })
+    .on("mouseover", function(d,i) {		
       div.transition()		
           .duration(200)		
           .style("opacity", .9);		
@@ -662,14 +778,12 @@ function zoomToCountry(country, coordinates, dataset) {
     for (i = 0; i < countryStudentCount.length; i++) {
       //TODO: echte coordinaten gebruiken
       var coordinates = getRandomCoordinates(countryData.latlng[0], countryData.latlng[1], 2);
-      //bubbles.push({name: countryStudentCount[i].key, latitude: coordinates[0], longitude: coordinates[1], radius: countryStudentCount[i].values, fillKey: 'BEL'});
       bubbles.push({
         name: countryStudentCount[i].key,
         latitude: coordinates[0],
         longitude: coordinates[1],
         radius: 10,
         fillKey: countryStudentCount[i].key,
-        //color: paletteScale(countryStudentCount[i].values)
         numberOfStudents: datasetZoom[countryStudentCount[i].key].numberOfStudents
       });
     };
@@ -903,6 +1017,7 @@ function getYearlyCount(data){
       yearlyCount = getStudentCountPerYearCountry(data,selectedCountry);
       break;
     case 'university':
+      console.log(selectedUniversity.name);
       yearlyCount = getStudentCountPerYearUniversity(data,selectedUniversity.name);
       break;
     default:
@@ -924,6 +1039,7 @@ function getHighestCount(yearlyCount){
 //TODO
 function getFacultyColors(){
   var faculties = [
+    "Total",
     "Fac. Psychologie en Pedagogische Wet.", 
     "Faculteit Geneeskunde", 
     "Faculteit Rechtsgeleerdheid", 
@@ -941,15 +1057,12 @@ function getFacultyColors(){
     "Faculteit Architectuur"
   ]
 
-  var colorScale = d3v5.scaleSequential().domain(faculties)
-    .interpolator(d3v5.interpolateViridis);
+  /*var color = d3.scale.ordinal()
+    .domain(faculties)
+    .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
 
-  var c20 = d3.scale.category20();
+  var color = d3v5.scaleOrdinal().domain(faculties)
+  .range(d3v5.schemeSet3);
 
-  var colors = [];
-  for (i=0;i<faculties.length;i++){
-    key = faculties[i];
-    colors.push({key: colorScale[i]});
-  }
-  return c20;
+  return color;
 }
