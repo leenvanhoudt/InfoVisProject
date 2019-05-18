@@ -72,7 +72,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
       d3.select(".allCheckbox").property("checked", false);
     } else if (d3.selectAll(".myCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", true);
-    } 
+    }
     update();
   }
 
@@ -637,7 +637,7 @@ function updateFacultyGraph() {
   //var colors = d3v5.schemeCategory10;
   //colors.length = 7;
   var colors =["#ecf8f8","#3baba3","#c6ebe9","#2e857e","#7ad1cb","#215f5a","#a0deda"];
-  /*var colors = [  
+  /*var colors = [
     "#576A8A",
     "#56CE96",
     "#5C3A51",
@@ -746,7 +746,6 @@ function updateFacultyGraph() {
     .duration(750);
   rect.transition(t);
 
-
   var legend = svgBar.selectAll(".legend")
     .data(colors)
     .enter().append("g")
@@ -823,29 +822,26 @@ function updateUniversityGraph() {
       bottom: 200,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 2,
+    height = (window.innerHeight - margin.top - margin.bottom) / 3;
 
-  var facultyCount;
+  var universityCount;
   switch (view) {
     case 'world':
-      facultyCount = getStudentCountPerFacultyTotal();
+      universityCount = getStudentCountPerUniversityTotal();
       break;
     case 'country':
-      facultyCount = getStudentCountPerFacultyCountry(selectedCountry);
-      break;
-    case 'university':
-      facultyCount = getStudentCountPerFacultyUniversity(selectedUniversity.name);
+      universityCount = getStudentCountPerUniversityCountry(selectedCountry);
       break;
     default:
-      facultyCount = getStudentCountPerFacultyTotal();
+      universityCount = getStudentCountPerUniversityTotal();
   }
 
-  var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
-    return facultyCount.map(function(d) {
+  var dataset = d3.layout.stack()(getSelectedFaculties().map(function(faculty) {
+    return universityCount.map(function(d) {
       return {
-        x: d.faculty,
-        y: +d[year] || +0
+        x: d.university,
+        y: +d[faculty] || +0
       };
     });
   }));
@@ -853,7 +849,7 @@ function updateUniversityGraph() {
   var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
       return d.x;
-    }).sort())
+    }))
     .rangeRoundBands([10, width - 10], 0.02);
 
   var yTicks = getSmartTicks(d3.max(dataset, function(d) {
@@ -866,8 +862,7 @@ function updateUniversityGraph() {
     .domain([0, yTicks.endPoint])
     .range([height, 0]);
 
-  var colors = d3v5.schemeCategory10;
-  colors.length = 7;
+  var colors = getFacultyColors();
 
   // Define and draw axes
   var yAxis = d3.svg.axis()
@@ -978,8 +973,8 @@ function updateUniversityGraph() {
     .attr("x", width - 18)
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", function(d, i) {
-      return colors.slice().reverse()[i];
+    .style("fill", function(d) {
+      return getFacultyColors(d.faculty);
     });
 
   legend.append("text")
@@ -988,7 +983,7 @@ function updateUniversityGraph() {
     .attr("dy", ".35em")
     .style("text-anchor", "start")
     .text(function(d, i) {
-      return 2018 - i;
+      return d.faculty;
     });
 
   // Prep the tooltip bits, initial display is hidden
@@ -1317,6 +1312,79 @@ function getStudentCountPerFacultyUniversity(university) {
     return result
   });;
   return yearlyCountPerUniversity;
+}
+
+function getStudentCountPerUniversityTotal() {
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Uitwisselingsinstelling;
+    })
+    .key(function(d) {
+      return d.Faculteit;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData)
+    .map(function(d, i) {
+      var sum = 0;
+      var result = {
+        university: d.key
+      };
+      d.values.forEach(function(faculty) {
+        result[faculty.key] = faculty.values;
+        sum += faculty.values;
+      });
+      result.total = sum;
+      return result
+    });
+    yearlyCount.sort(function(a,b){
+      return b.total - a.total;
+    });
+
+    if (yearlyCount.length > 10)
+      yearlyCount.length = 10;
+  return yearlyCount;
+}
+
+function getStudentCountPerUniversityCountry(country) {
+  var yearlyCount = d3.nest()
+    .key(function(d) {
+      return d.Land;
+    })
+    .key(function(d) {
+      return d.Uitwisselingsinstelling;
+    })
+    .key(function(d) {
+      return d.Faculteit;
+    })
+    .rollup(function(leaves) {
+      return leaves.length;
+    })
+    .entries(selectedData);
+
+  var yearlyCountPerCountry = yearlyCount.find(obj => {
+    return obj.key === country;
+  }).values.map(function(d, i) {
+    var sum = 0;
+    var result = {
+      university: d.key
+    };
+    d.values.forEach(function(faculty) {
+      result[faculty.key] = faculty.values;
+      sum += faculty.values;
+    });
+    result.total = sum;
+    return result
+  });
+
+  yearlyCountPerCountry.sort(function(a,b){
+    return b.total - a.total;
+  });
+
+  if (yearlyCountPerCountry.length > 10)
+    yearlyCountPerCountry.length = 10;
+  return yearlyCountPerCountry;
 }
 
 function updateText(begin, end, totalCount) {
