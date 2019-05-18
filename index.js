@@ -8,6 +8,7 @@ var selectedCountryCoordinates;
 var selectedUniversity;
 var svg;
 var svgBar;
+var svgUni;
 var yearSelected;
 //view = 'world', 'country' or 'university'
 var view = 'world';
@@ -38,6 +39,26 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     yearSelected[handle] = parseInt(values[handle]);
     update();
   });
+
+  function update() {
+    selectedData = updateSelectedData(csv_data, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
+    var dataset = makeDataset(selectedData);
+    if (Object.keys(dataset).length === 0) {
+      dataset = makeDummySet(csv_data);
+    }
+    overviewMap.updateChoropleth(dataset);
+
+    if (view == 'country' || view == 'university') {
+      zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
+      //graphs en text worden geupdate in de zoomToCountry function
+    } else {
+      updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+      updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
+      //TODO
+      updateFacultyGraph();
+      updateUniversityGraph();
+    }
+  }
 
   function checkAll() {
     if (d3.select(".allCheckbox").property("checked")) {
@@ -170,6 +191,7 @@ function initializeView(dataset) {
   initializeStudentCountGraph();
   //TODO
   initializeFacultyGraph();
+  initializeUniversityGraph();
 }
 
 function initializeMaps(dataset) {
@@ -561,7 +583,7 @@ function initializeFacultyGraph() {
     width = (window.innerWidth - margin.left - margin.right) / 3,
     height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
-  svgBar = d3v5.select(".stackedbarchart").append("svg")
+  svgBar = d3v5.select(".facultygraph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -791,10 +813,231 @@ function updateFacultyGraph() {
 
 }
 
+function initializeUniversityGraph() {
+  var margin = {
+      top: 20,
+      right: 100,
+      bottom: 200,
+      left: 100
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 2,
+    height = (window.innerHeight - margin.top - margin.bottom) / 3;
+
+  svgUni = d3v5.select(".universitygraph").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svgUni.append("g")
+    .attr("class", "y axis");
+
+  svgUni.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")");
+}
+
+function updateUniversityGraph() {
+  var margin = {
+      top: 20,
+      right: 100,
+      bottom: 200,
+      left: 100
+    },
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+
+  var facultyCount;
+  switch (view) {
+    case 'world':
+      facultyCount = getStudentCountPerFacultyTotal();
+      break;
+    case 'country':
+      facultyCount = getStudentCountPerFacultyCountry(selectedCountry);
+      break;
+    case 'university':
+      facultyCount = getStudentCountPerFacultyUniversity(selectedUniversity.name);
+      break;
+    default:
+      facultyCount = getStudentCountPerFacultyTotal();
+  }
+
+  var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
+    return facultyCount.map(function(d) {
+      return {
+        x: d.faculty,
+        y: +d[year] || +0
+      };
+    });
+  }));
+
+  var x = d3.scale.ordinal()
+    .domain(dataset[0].map(function(d) {
+      return d.x;
+    }).sort())
+    .rangeRoundBands([10, width - 10], 0.02);
+
+  var yTicks = getSmartTicks(d3.max(dataset, function(d) {
+    return d3.max(d, function(d) {
+      return d.y0 + d.y;
+    });
+  }), height);
+
+  var y = d3.scale.linear()
+    .domain([0, yTicks.endPoint])
+    .range([height, 0]);
+
+  var colors = d3v5.schemeCategory10;
+  colors.length = 7;
+
+  // Define and draw axes
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(yTicks.count)
+    .tickSize(-width, 0, 0)
+    .tickFormat(function(d) {
+      return d
+    });
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .tickFormat(function(d) {
+      return d
+    });
+
+  svgUni.select(".y.axis")
+    .call(yAxis)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", "-6em")
+    .attr("dx", "-15em")
+    .style("text-anchor", "end")
+    .text("Students");
+
+  svgUni.select(".x.axis")
+    .call(xAxis)
+    .selectAll("text")
+    .style("text-anchor", "end")
+    .attr("dx", "-.9em")
+    .attr("dy", ".25em")
+    .attr("transform", "rotate(-50)");
+
+  // Create groups for each series, rects for each segment
+  var groups = svgUni.selectAll("g.cost")
+    .data(dataset);
+
+  groups.exit().remove();
+
+  groups.enter().append("g")
+    .attr("class", "cost")
+    .style("fill", function(d, i) {
+      return colors[i];
+    });
+
+  var rect = groups.selectAll("rect")
+    .data(function(d) {
+      return d;
+    });
+
+  rect.exit()
+    .remove();
+
+  rect.attr("class", "rect")
+    .attr("x", function(d) {
+      return x(d.x);
+    })
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
+    })
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand());
+
+  rect.enter()
+    .append("rect")
+    .attr("x", function(d) {
+      return x(d.x);
+    })
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
+    })
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand())
+    .on("mouseover", function(d) {
+      tooltip.style("display", null);
+    })
+    .on("mouseout", function() {
+      tooltip.style("display", "none");
+    })
+    .on("mousemove", function(d) {
+      var xPosition = d3v5.mouse(this)[0] - 15;
+      var yPosition = d3v5.mouse(this)[1] - 25;
+      tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+      tooltip.select("text").text(d.y);
+    })
+
+  var t = d3v5.transition()
+    .duration(750);
+  rect.transition(t);
+
+
+  var legend = svgUni.selectAll(".legend")
+    .data(colors)
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(30," + i * 19 + ")";
+    });
+
+  legend.append("rect")
+    .attr("x", width - 18)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d, i) {
+      return colors.slice().reverse()[i];
+    });
+
+  legend.append("text")
+    .attr("x", width + 5)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d, i) {
+      return 2018 - i;
+    });
+
+  // Prep the tooltip bits, initial display is hidden
+  var tooltip = svgUni.append("g")
+    .attr("class", "tooltip")
+    .style("display", "none");
+
+  tooltip.append("rect")
+    .attr("width", 30)
+    .attr("height", 20)
+    .attr("fill", "white")
+    .style("opacity", 0.5);
+
+  tooltip.append("text")
+    .attr("x", 15)
+    .attr("dy", "1.2em")
+    .style("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("font-weight", "bold");
+
+}
+
 function zoomToCountry(country, coordinates, dataset) {
   addCountryBreadcrumb();
   updateStudentCountGraph(yearSelected[0], yearSelected[1]);
   updateFacultyGraph();
+  updateUniversityGraph();
+
   if (view == 'country') {
     updateText(yearSelected[0], yearSelected[1], countStudentsCountry(dataset, country));
   };
@@ -929,6 +1172,7 @@ function zoomToCountry(country, coordinates, dataset) {
       selectedUniversity = bubble;
       updateStudentCountGraph(yearSelected[0], yearSelected[1]);
       updateFacultyGraph();
+      updateUniversityGraph();
       updateText(yearSelected[0], yearSelected[1], bubble.numberOfStudents);
       //document.getElementById('universityName').innerHTML = bubble.name;
       addUniversityBreadcrumb()
