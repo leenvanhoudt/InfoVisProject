@@ -1,5 +1,6 @@
 var overviewMap;
 var zoomedMap;
+var originalData;
 var selectedData;
 var selectedCountry;
 var selectedCountryCoordinates;
@@ -20,6 +21,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     student.Eind = parseInt(student.Eind);
   });
 
+  originalData = csv_data;
   selectedData = csv_data;
   yearSelected = [2012, 2019];
 
@@ -90,6 +92,25 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     update();
   }
 });
+
+function update() {
+  selectedData = updateSelectedData(originalData, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
+  var dataset = makeDataset(selectedData);
+  if (Object.keys(dataset).length === 0) {
+    dataset = makeDummySet(csv_data);
+  }
+  overviewMap.updateChoropleth(dataset);
+
+  if (view == 'country' || view == 'university') {
+    zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
+    //graphs en text worden geupdate in de zoomToCountry function
+  } else {
+    updateStudentCountGraph(yearSelected[0], yearSelected[1]);
+    updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
+    //TODO
+    updateFacultyGraph();
+  }
+}
 
 function updateSelectedData(csv_data, begin, end, faculties) {
   selectedYears = [];
@@ -192,8 +213,8 @@ function initializeMaps(dataset) {
     },
     done: function(datamap) {
       datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-        document.getElementById('countryName').innerHTML = geography.properties.name;
-        document.getElementById('universityName').innerHTML = "";
+        //document.getElementById('countryName').innerHTML = geography.properties.name;
+        //document.getElementById('universityName').innerHTML = "";
         d3.json("Datasets/countries.json", function(data) {
           var countryData = data.find(obj => {
             return obj.name === geography.properties.name
@@ -1007,6 +1028,7 @@ function updateUniversityGraph() {
 }
 
 function zoomToCountry(country, coordinates, dataset) {
+  addCountryBreadcrumb();
   updateStudentCountGraph(yearSelected[0], yearSelected[1]);
   updateFacultyGraph();
   updateUniversityGraph();
@@ -1147,7 +1169,8 @@ function zoomToCountry(country, coordinates, dataset) {
       updateFacultyGraph();
       updateUniversityGraph();
       updateText(yearSelected[0], yearSelected[1], bubble.numberOfStudents);
-      document.getElementById('universityName').innerHTML = bubble.name;
+      //document.getElementById('universityName').innerHTML = bubble.name;
+      addUniversityBreadcrumb()
     });
   });
 };
@@ -1537,4 +1560,54 @@ function getFacultyColors() {
     //.range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000']);
 
   return color;
+}
+
+function addCountryBreadcrumb(){
+  var li = document.getElementById('countryBreadcrumb');
+  if(li==null){
+    li = document.createElement('li');
+    li.setAttribute('id', "countryBreadcrumb");
+    document.getElementById('breadcrumbs').appendChild(li);
+  }
+
+  li.innerHTML = selectedCountry;
+  var previousLi = document.getElementById("worldBreadcrumb");
+  previousLi.innerHTML = '<a href="javascript:switchToWorldView()">Europa</a>';
+}
+
+function addUniversityBreadcrumb(){
+  var li = document.getElementById("universityBreadcrumb");
+  if(li==null){
+    var li = document.createElement('li');
+    li.setAttribute('id', "universityBreadcrumb");
+    document.getElementById('breadcrumbs').appendChild(li);
+  }
+
+  li.innerHTML = selectedUniversity.name;
+  var previousLi = document.getElementById("countryBreadcrumb");
+  previousLi.innerHTML = '<a href="javascript:switchToCountryView()">'+selectedCountry+'</a>';
+}
+
+function switchToCountryView() {
+  removeElement("universityBreadcrumb");
+  var previousLi = document.getElementById("countryBreadcrumb");
+  previousLi.innerHTML = selectedCountry;
+  view = 'country';
+  update();
+}
+
+function switchToWorldView() {
+  removeElement("countryBreadcrumb");
+  if(document.getElementById("universityBreadcrumb")!=null) {
+    removeElement("universityBreadcrumb");
+  }
+  var previousLi = document.getElementById("worldBreadcrumb");
+  previousLi.innerHTML = 'Europa';
+  view = 'world';
+  update();
+}
+
+function removeElement(elementId) {
+  var element = document.getElementById(elementId);
+  element.parentNode.removeChild(element);
 }
