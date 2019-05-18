@@ -571,6 +571,14 @@ function initializeFacultyGraph() {
   svgBar.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")");
+
+  // Graph title
+  svgBar.append("text")
+    .attr("class", "axis title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "end")
+    .text("Aantal studenten per faculteit");
 }
 
 function updateFacultyGraph() {
@@ -642,16 +650,8 @@ function updateFacultyGraph() {
     "#C16A4F",
     "#683627"];*/
 
-  // Define and draw axes
-  var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(yTicks.count)
-    .tickSize(-width, 0, 0)
-    .tickFormat(function(d) {
-      return d
-    });
 
+  // Define the axes
   var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom")
@@ -659,15 +659,20 @@ function updateFacultyGraph() {
       return d
     });
 
+  var yAxis = d3v5.axisLeft(y)
+    .ticks(yTicks.count)
+    .tickFormat(d3.format("d"));
+
   svgBar.select(".y.axis")
     .call(yAxis)
     .append("text")
+    .attr("class","axis label")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
-    .attr("dy", "-6em")
+    .attr("dy", "-5em")
     .attr("dx", "-15em")
-    .style("text-anchor", "end")
-    .text("Students");
+    .style("text-anchor", "start")
+    .text("Aantal studenten");
 
   svgBar.select(".x.axis")
     .call(xAxis)
