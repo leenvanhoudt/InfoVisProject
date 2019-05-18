@@ -30,6 +30,9 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
 
   d3.select(".allCheckbox").on("change", checkAll);
   d3.selectAll(".myCheckbox").on("change", checkSingle);
+  d3v5.select(".radioTotal").on("change", checkRadioButtonTotal);
+  d3v5.select(".radioComparison").on("change", checkRadioButtonComparison);
+
   slider.noUiSlider.on('update', function(values, handle) {
     yearSelected[handle] = parseInt(values[handle]);
     update();
@@ -58,7 +61,6 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkAll() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.selectAll(".myCheckbox").property("checked", true);
-      allFacultiesSelected = true;
     } else {
       d3.selectAll(".myCheckbox").property("checked", false);
     }
@@ -68,13 +70,23 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkSingle() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", false);
-      allFacultiesSelected = false;
     } else if (d3.selectAll(".myCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", true);
-      allFacultiesSelected = true;
-    } else {
-      allFacultiesSelected = false;
-    }
+    } 
+    update();
+  }
+
+  function checkRadioButtonComparison() {
+    d3.select(".radioTotal").property("checked", false)
+    d3.select(".radioComparison").property("checked", true)
+    allFacultiesSelected = false;
+    update();
+  }
+
+  function checkRadioButtonTotal() {
+    d3.select(".radioTotal").property("checked", true)
+    d3.select(".radioComparison").property("checked", false)
+    allFacultiesSelected = true;
     update();
   }
 });
@@ -259,7 +271,7 @@ function initializeStudentCountGraph() {
     .attr("text-anchor", "end")
     .attr("x", width - 200)
     .attr("y", height + margin.top - 10)
-    .text("Year");
+    .text("Jaar");
 
   // Y axis label
   svg.append("text")
@@ -268,7 +280,7 @@ function initializeStudentCountGraph() {
     .attr("transform", "rotate(-90)")
     .attr("y", -margin.left + 10)
     .attr("x", -margin.top + 30)
-    .text("Student count")
+    .text("Aantal studenten")
 
   // Graph title
   svg.append("text")
@@ -276,7 +288,7 @@ function initializeStudentCountGraph() {
     .attr("x", (width / 2))
     .attr("y", 0 - (margin.top / 2))
     .attr("text-anchor", "end")
-    .text("Student count per year");
+    .text("Aantal studenten per jaar");
 
   // Legend
   svg.append("g")
@@ -311,11 +323,11 @@ function updateStudentCountGraph(begin, end) {
     var yearlyCount = getYearlyCount(selectedData);
     range = yearlyCount;
     lineData.push({
-      key: 'Total',
+      key: 'Totaal',
       value: yearlyCount
     });
   } else {
-    var faculties = getSelectedFaculties();
+    var faculties = getSelectedFaculties(false);
     var highestCount = 0;
     for (i = 0; i < faculties.length; i++) {
       var facultyData = updateSelectedData(selectedData, yearSelected[0], yearSelected[1], [faculties[i]]);
@@ -478,51 +490,56 @@ function updateNodes(data, x, y) {
   var t = d3.transition()
     .duration(750);
 
-  // JOIN new data with old elements.
-  var nodes = svg.select("g.dot")
+  var nodes = svg.selectAll("g.dot")
     .data(data)
-    .selectAll("circle")
-    .data(function(d) {
-      return d.value;
-    })
 
-  // EXIT old elements not present in new data.
   nodes.exit()
     .attr("class", "dot")
     .remove();
 
-  // UPDATE old elements present in new data.
   nodes.attr("class", "dot")
-    .attr("cx", function(d, i) {
-      return x(d.key)
-    })
-    .attr("cy", function(d, i) {
-      return y(d.values)
-    })
     .style("fill", function(d) {
       var colorScale = getFacultyColors();
       return colorScale(d.key);
-    })
+    });
 
-  // ENTER new elements present in new data.
-  nodes.enter().append("circle")
+  var merge = nodes.enter().append("g")
     .attr("class", "dot")
-    .attr("cx", function(d, i) {
+    .style("fill", function(d) {
+      var colorScale = getFacultyColors();
+      return colorScale(d.key);
+    });
+
+  var circles = merge.merge(nodes)
+    .selectAll("circle")
+    .data(function(d) { return d.value; })
+
+  circles.exit()
+    .attr("class", "dot")
+    .remove();
+
+  circles.attr("class", "dot")
+    .attr("cx", function(d) {
       return x(d.key)
     })
-    .attr("cy", function(d, i) {
+    .attr("cy", function(d) {
+      return y(d.values)
+    })
+
+  circles.enter().append("circle")
+    .attr("class", "dot")
+    .attr("cx", function(d) {
+      return x(d.key)
+    })
+    .attr("cy", function(d) {
       return y(d.values)
     })
     .attr("r", 5)
-    .style("fill", function(d, i) {
-      var colorScale = getFacultyColors();
-      return colorScale(d.key);
-    })
     .on("mouseover", function(d, i) {
       div.transition()
         .duration(200)
         .style("opacity", .9);
-      div.html(d.values + " students")
+      div.html(d.values + " studenten")
         .style("left", (d3v5.event.pageX) + "px")
         .style("top", (d3v5.event.pageY - 28) + "px");
     })
@@ -557,6 +574,14 @@ function initializeFacultyGraph() {
   svgBar.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")");
+
+  // Graph title
+  svgBar.append("text")
+    .attr("class", "axis title")
+    .attr("x", (width / 2))
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "end")
+    .text("Aantal studenten per faculteit");
 }
 
 function updateFacultyGraph() {
@@ -609,19 +634,27 @@ function updateFacultyGraph() {
     .domain([0, yTicks.endPoint])
     .range([height, 0]);
 
-  var colors = d3v5.schemeCategory10;
-  colors.length = 7;
+  //var colors = d3v5.schemeCategory10;
+  //colors.length = 7;
+  var colors =["#ecf8f8","#3baba3","#c6ebe9","#2e857e","#7ad1cb","#215f5a","#a0deda"];
+  /*var colors = [  
+    "#576A8A",
+    "#56CE96",
+    "#5C3A51",
+    "#CAF270",
+    "#3A1A1C",
+    "#2A9FA7"];
+  var colors = [
+    "#50D6EE",
+    "#38CDB0",
+    "#6EBB6F",
+    "#9BA242",
+    "#B8853A",
+    "#C16A4F",
+    "#683627"];*/
 
-  // Define and draw axes
-  var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(yTicks.count)
-    .tickSize(-width, 0, 0)
-    .tickFormat(function(d) {
-      return d
-    });
 
+  // Define the axes
   var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom")
@@ -629,15 +662,20 @@ function updateFacultyGraph() {
       return d
     });
 
+  var yAxis = d3v5.axisLeft(y)
+    .ticks(yTicks.count)
+    .tickFormat(d3.format("d"));
+
   svgBar.select(".y.axis")
     .call(yAxis)
     .append("text")
+    .attr("class","axis label")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
-    .attr("dy", "-6em")
+    .attr("dy", "-5em")
     .attr("dx", "-15em")
-    .style("text-anchor", "end")
-    .text("Students");
+    .style("text-anchor", "start")
+    .text("Aantal studenten");
 
   svgBar.select(".x.axis")
     .call(xAxis)
@@ -698,8 +736,8 @@ function updateFacultyGraph() {
       tooltip.style("display", "none");
     })
     .on("mousemove", function(d) {
-      var xPosition = d3v5.mouse(this)[0] - 15;
-      var yPosition = d3v5.mouse(this)[1] - 25;
+      var xPosition = d3v5.mouse(this)[0] - 35;
+      var yPosition = d3v5.mouse(this)[1];
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
       tooltip.select("text").text(d.y);
     })
@@ -1401,7 +1439,7 @@ function getHighestCount(yearlyCount) {
 //TODO
 function getFacultyColors() {
   var faculties = [
-    "Total",
+    "Totaal",
     "Fac. Psychologie en Pedagogische Wet.",
     "Faculteit Geneeskunde",
     "Faculteit Rechtsgeleerdheid",
@@ -1425,6 +1463,10 @@ function getFacultyColors() {
 
   var color = d3v5.scaleOrdinal().domain(faculties)
     .range(d3v5.schemeSet3);
+    //.range(["rgb(114,229,239)", "rgb(44,74,94)", "rgb(115,240,46)", "rgb(128,25,103)", "rgb(153,214,131)", "rgb(212,95,234)", "rgb(89,146,58)", "rgb(113,37,189)", "rgb(243,197,250)", "rgb(19,90,194)", "rgb(28,241,163)", "rgb(147,49,28)", "rgb(255,162,112)", "rgb(11,83,19)", "rgb(250,85,122)"]);
+    //.range(["rgb(82,239,153)", "rgb(16,75,109)", "rgb(165,203,235)", "rgb(21,81,38)", "rgb(35,219,225)", "rgb(119,49,41)", "rgb(181,226,135)", "rgb(214,7,36)", "rgb(12,168,46)", "rgb(95,134,183)", "rgb(76,243,44)", "rgb(214,118,94)", "rgb(120,157,35)", "rgb(5,149,122)", "rgb(248,204,166)"]);
+    //.range(["rgb(160,227,183)", "rgb(17,103,126)", "rgb(152,218,29)", "rgb(43,114,231)", "rgb(163,201,254)", "rgb(37,107,51)", "rgb(28,241,163)", "rgb(90,67,22)", "rgb(32,216,253)", "rgb(46,229,45)", "rgb(162,127,39)", "rgb(220,218,94)", "rgb(210,197,171)", "rgb(255,185,71)","rgb(214,7,36)"]);
+    //.range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000']);
 
   return color;
 }

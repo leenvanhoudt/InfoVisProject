@@ -46,8 +46,8 @@
       </div>
 
       <div>
-          <p class="title">Faculteiten</p>
-        </div>
+        <p class="title">Faculteiten</p>
+      </div>
 
       <div style="display: flex; flex-direction: column;">
         <label> <input type="checkbox" class="allCheckbox" value="Alle Faculteiten"> <span class="checkboxText">Alle Faculteiten</span> </label>
@@ -70,6 +70,20 @@
         <script>
           d3.select(".allCheckbox").property("checked",true);
           d3.selectAll(".myCheckbox").property("checked", true);
+        </script>
+      </div>
+
+      <div>
+        <p class="title">Weergave line chart</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <label> <input type="radio" class="radioTotal" value="Total"> <span class="checkboxText">Toon totaal aantal studenten</span> </label>
+        <label> <input type="radio" class="radioComparison" value="Comparison"> <span class="checkboxText">Toon vergelijking</span> </label>
+   
+        <script>
+          d3v5.select(".radioTotal").property("checked",true);
+          d3v5.select(".radioComparison").property("checked", false);
         </script>
       </div>
     </div>
