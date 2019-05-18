@@ -533,7 +533,9 @@ function updateNodes(data, x, y) {
 
   var circles = merge.merge(nodes)
     .selectAll("circle")
-    .data(function(d) { return d.value; })
+    .data(function(d) {
+      return d.value;
+    })
 
   circles.exit()
     .attr("class", "dot")
@@ -657,7 +659,7 @@ function updateFacultyGraph() {
 
   //var colors = d3v5.schemeCategory10;
   //colors.length = 7;
-  var colors =["#ecf8f8","#3baba3","#c6ebe9","#2e857e","#7ad1cb","#215f5a","#a0deda"];
+  var colors = ["#ecf8f8", "#3baba3", "#c6ebe9", "#2e857e", "#7ad1cb", "#215f5a", "#a0deda"];
   /*var colors = [
     "#576A8A",
     "#56CE96",
@@ -690,7 +692,7 @@ function updateFacultyGraph() {
   svgBar.select(".y.axis")
     .call(yAxis)
     .append("text")
-    .attr("class","axis label")
+    .attr("class", "axis label")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
     .attr("dy", "-5em")
@@ -757,8 +759,8 @@ function updateFacultyGraph() {
       tooltip.style("display", "none");
     })
     .on("mousemove", function(d) {
-      var xPosition = d3v5.mouse(this)[0] - 35;
-      var yPosition = d3v5.mouse(this)[1];
+      var xPosition = d3v5.mouse(this)[0] - 15;
+      var yPosition = d3v5.mouse(this)[1] - 25;
       tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
       tooltip.select("text").text(d.y);
     })
@@ -883,7 +885,11 @@ function updateUniversityGraph() {
     .domain([0, yTicks.endPoint])
     .range([height, 0]);
 
-  var colors = getFacultyColors();
+  var colors = [];
+  var colorScale = getFacultyColors();
+  getSelectedFaculties().forEach(function(faculty) {
+    colors.push({"faculty": faculty, "color": colorScale(faculty)})
+  });
 
   // Define and draw axes
   var yAxis = d3.svg.axis()
@@ -929,7 +935,7 @@ function updateUniversityGraph() {
   groups.enter().append("g")
     .attr("class", "cost")
     .style("fill", function(d, i) {
-      return colors[i];
+      return colors[i].color;
     });
 
   var rect = groups.selectAll("rect")
@@ -995,7 +1001,7 @@ function updateUniversityGraph() {
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", function(d) {
-      return getFacultyColors(d.faculty);
+      return d.color;
     });
 
   legend.append("text")
@@ -1361,12 +1367,12 @@ function getStudentCountPerUniversityTotal() {
       result.total = sum;
       return result
     });
-    yearlyCount.sort(function(a,b){
-      return b.total - a.total;
-    });
+  yearlyCount.sort(function(a, b) {
+    return b.total - a.total;
+  });
 
-    if (yearlyCount.length > 10)
-      yearlyCount.length = 10;
+  if (yearlyCount.length > 10)
+    yearlyCount.length = 10;
   return yearlyCount;
 }
 
@@ -1401,7 +1407,7 @@ function getStudentCountPerUniversityCountry(country) {
     return result
   });
 
-  yearlyCountPerCountry.sort(function(a,b){
+  yearlyCountPerCountry.sort(function(a, b) {
     return b.total - a.total;
   });
 
@@ -1551,20 +1557,19 @@ function getFacultyColors() {
   /*var color = d3.scale.ordinal()
     .domain(faculties)
     .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
-
   var color = d3v5.scaleOrdinal().domain(faculties)
-    .range(d3v5.schemeSet3);
-    //.range(["rgb(114,229,239)", "rgb(44,74,94)", "rgb(115,240,46)", "rgb(128,25,103)", "rgb(153,214,131)", "rgb(212,95,234)", "rgb(89,146,58)", "rgb(113,37,189)", "rgb(243,197,250)", "rgb(19,90,194)", "rgb(28,241,163)", "rgb(147,49,28)", "rgb(255,162,112)", "rgb(11,83,19)", "rgb(250,85,122)"]);
-    //.range(["rgb(82,239,153)", "rgb(16,75,109)", "rgb(165,203,235)", "rgb(21,81,38)", "rgb(35,219,225)", "rgb(119,49,41)", "rgb(181,226,135)", "rgb(214,7,36)", "rgb(12,168,46)", "rgb(95,134,183)", "rgb(76,243,44)", "rgb(214,118,94)", "rgb(120,157,35)", "rgb(5,149,122)", "rgb(248,204,166)"]);
-    //.range(["rgb(160,227,183)", "rgb(17,103,126)", "rgb(152,218,29)", "rgb(43,114,231)", "rgb(163,201,254)", "rgb(37,107,51)", "rgb(28,241,163)", "rgb(90,67,22)", "rgb(32,216,253)", "rgb(46,229,45)", "rgb(162,127,39)", "rgb(220,218,94)", "rgb(210,197,171)", "rgb(255,185,71)","rgb(214,7,36)"]);
-    //.range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000']);
+    .range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000']);
+  //.range(["rgb(114,229,239)", "rgb(44,74,94)", "rgb(115,240,46)", "rgb(128,25,103)", "rgb(153,214,131)", "rgb(212,95,234)", "rgb(89,146,58)", "rgb(113,37,189)", "rgb(243,197,250)", "rgb(19,90,194)", "rgb(28,241,163)", "rgb(147,49,28)", "rgb(255,162,112)", "rgb(11,83,19)", "rgb(250,85,122)"]);
+  //.range(["rgb(82,239,153)", "rgb(16,75,109)", "rgb(165,203,235)", "rgb(21,81,38)", "rgb(35,219,225)", "rgb(119,49,41)", "rgb(181,226,135)", "rgb(214,7,36)", "rgb(12,168,46)", "rgb(95,134,183)", "rgb(76,243,44)", "rgb(214,118,94)", "rgb(120,157,35)", "rgb(5,149,122)", "rgb(248,204,166)"]);
+  //.range(["rgb(160,227,183)", "rgb(17,103,126)", "rgb(152,218,29)", "rgb(43,114,231)", "rgb(163,201,254)", "rgb(37,107,51)", "rgb(28,241,163)", "rgb(90,67,22)", "rgb(32,216,253)", "rgb(46,229,45)", "rgb(162,127,39)", "rgb(220,218,94)", "rgb(210,197,171)", "rgb(255,185,71)","rgb(214,7,36)"]);
+  //.range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000']);
 
   return color;
 }
 
-function addCountryBreadcrumb(){
+function addCountryBreadcrumb() {
   var li = document.getElementById('countryBreadcrumb');
-  if(li==null){
+  if (li == null) {
     li = document.createElement('li');
     li.setAttribute('id', "countryBreadcrumb");
     document.getElementById('breadcrumbs').appendChild(li);
@@ -1575,9 +1580,9 @@ function addCountryBreadcrumb(){
   previousLi.innerHTML = '<a href="javascript:switchToWorldView()">Europa</a>';
 }
 
-function addUniversityBreadcrumb(){
+function addUniversityBreadcrumb() {
   var li = document.getElementById("universityBreadcrumb");
-  if(li==null){
+  if (li == null) {
     var li = document.createElement('li');
     li.setAttribute('id', "universityBreadcrumb");
     document.getElementById('breadcrumbs').appendChild(li);
@@ -1585,7 +1590,7 @@ function addUniversityBreadcrumb(){
 
   li.innerHTML = selectedUniversity.name;
   var previousLi = document.getElementById("countryBreadcrumb");
-  previousLi.innerHTML = '<a href="javascript:switchToCountryView()">'+selectedCountry+'</a>';
+  previousLi.innerHTML = '<a href="javascript:switchToCountryView()">' + selectedCountry + '</a>';
 }
 
 function switchToCountryView() {
@@ -1598,7 +1603,7 @@ function switchToCountryView() {
 
 function switchToWorldView() {
   removeElement("countryBreadcrumb");
-  if(document.getElementById("universityBreadcrumb")!=null) {
+  if (document.getElementById("universityBreadcrumb") != null) {
     removeElement("universityBreadcrumb");
   }
   var previousLi = document.getElementById("worldBreadcrumb");
