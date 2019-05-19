@@ -328,11 +328,13 @@ function updateStudentCountGraph(begin, end) {
   //number of datapoints
   var n = end - begin;
 
-  var range;
+  var yRange;
+  var xRange;
   var lineData = [];
   if (allFacultiesSelected) {
     var yearlyCount = getYearlyCount(selectedData);
-    range = yearlyCount;
+    yRange = yearlyCount;
+    xRange = yearlyCount;
     lineData.push({
       key: 'Totaal',
       value: yearlyCount
@@ -340,6 +342,8 @@ function updateStudentCountGraph(begin, end) {
   } else {
     var faculties = getSelectedFaculties(false);
     var highestCount = 0;
+    var start = 2018;
+    var end = 2012;
     for (i = 0; i < faculties.length; i++) {
       var facultyData = updateSelectedData(selectedData, yearSelected[0], yearSelected[1], [faculties[i]]);
       var yearlyCount = getYearlyCount(facultyData);
@@ -348,8 +352,13 @@ function updateStudentCountGraph(begin, end) {
         value: yearlyCount
       });
       if (getHighestCount(yearlyCount) > highestCount) {
-        range = yearlyCount;
+        yRange = yearlyCount;
         highestCount = getHighestCount(yearlyCount);
+      }
+      if(getYearRange(yearlyCount)[0]<=start && getYearRange(yearlyCount)[1]>=end){
+        xRange = yearlyCount;
+        start = getYearRange(yearlyCount)[0];
+        end = getYearRange(yearlyCount)[1];
       }
     }
   }
@@ -358,7 +367,7 @@ function updateStudentCountGraph(begin, end) {
   var x = d3v5.scaleLinear().range([0, width]);
   var y = d3v5.scaleLinear().range([height, 0]);
 
-  var yTicks = getSmartTicks(d3v5.max(range, function(d) {
+  var yTicks = getSmartTicks(d3v5.max(yRange, function(d) {
     return d.values;
   }), height);
 
@@ -371,7 +380,7 @@ function updateStudentCountGraph(begin, end) {
     .tickFormat(d3.format("d"));
 
   // Scale the range of the data
-  x.domain(d3v5.extent(range, function(d) {
+  x.domain(d3v5.extent(xRange, function(d) {
     return d.key;
   }));
   y.domain([0, yTicks.endPoint]);
@@ -463,7 +472,8 @@ function updateLegend(data, width) {
     .attr("dy", ".35em")
     .style("text-anchor", "start")
     .text(function(d) {
-      return d.key;
+      var shortFaculties = getFacultiesShorterNames();
+      return shortFaculties[d.key];
     });
 
   rect.enter().append("rect")
@@ -1572,6 +1582,12 @@ function getHighestCount(yearlyCount) {
     }
   }
   return highestCount;
+}
+
+function getYearRange(yearlyCount) {
+  var start = yearlyCount[0].key;
+  var end = yearlyCount[Object.keys(yearlyCount).length-1].key;
+  return [start,end];
 }
 
 //TODO
