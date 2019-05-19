@@ -4,6 +4,7 @@ var originalData;
 var selectedData;
 var selectedCountry;
 var selectedCountryCoordinates;
+var countryTranslations = {};
 //selectedUniversity = object with all info about the selected university
 var selectedUniversity;
 var svg;
@@ -19,6 +20,12 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   csv_data.forEach(function(student) {
     student.Begin = parseInt(student.Begin);
     student.Eind = parseInt(student.Eind);
+  });
+
+  d3.csv("Datasets/Landnamen.csv", function(error, csv_translation) {
+    csv_translation.forEach(function(country) {
+      countryTranslations[country.ENG] = country.NL;
+    });
   });
 
   originalData = csv_data;
@@ -229,8 +236,8 @@ function initializeMaps(dataset) {
         }
         // tooltip content
         return ['<div class="hoverinfo">',
-          '<strong>', geo.properties.name, '</strong>',
-          '<br># Students: <strong>', data.numberOfStudents, '</strong>',
+          '<strong>', countryTranslations[geo.properties.name], '</strong>',
+          '<br># Studenten: <strong>', data.numberOfStudents, '</strong>',
           '</div>'
         ].join('');
       }
@@ -1183,7 +1190,7 @@ function zoomToCountry(country, coordinates, dataset) {
       popupTemplate: function(geo, data) {
         return ['<div class="hoverinfo">',
           '<strong>', data.name, '</strong>',
-          '<br># Students: <strong>', datasetZoom[data.name].numberOfStudents, '</strong>',
+          '<br># Studenten: <strong>', datasetZoom[data.name].numberOfStudents, '</strong>',
           '</div>'
         ].join('');
       }
@@ -1609,7 +1616,7 @@ function addCountryBreadcrumb() {
     removeElement("universityBreadcrumb");
   }
 
-  li.innerHTML = selectedCountry;
+  li.innerHTML = countryTranslations[selectedCountry];
   var previousLi = document.getElementById("worldBreadcrumb");
   previousLi.innerHTML = '<a href="javascript:switchToWorldView()">Europa</a>';
 }
@@ -1624,13 +1631,13 @@ function addUniversityBreadcrumb() {
 
   li.innerHTML = selectedUniversity.name;
   var previousLi = document.getElementById("countryBreadcrumb");
-  previousLi.innerHTML = '<a href="javascript:switchToCountryView()">' + selectedCountry + '</a>';
+  previousLi.innerHTML = '<a href="javascript:switchToCountryView()">' + countryTranslations[selectedCountry] + '</a>';
 }
 
 function switchToCountryView() {
   removeElement("universityBreadcrumb");
   var previousLi = document.getElementById("countryBreadcrumb");
-  previousLi.innerHTML = selectedCountry;
+  previousLi.innerHTML = countryTranslations[selectedCountry];
   view = 'country';
   update();
 }
