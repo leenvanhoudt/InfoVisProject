@@ -631,6 +631,7 @@ function updateFacultyGraph() {
     default:
       facultyCount = getStudentCountPerFacultyTotal();
   }
+  console.log(facultyCount);
 
   var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
     return facultyCount.map(function(d) {
@@ -640,6 +641,7 @@ function updateFacultyGraph() {
       };
     });
   }));
+  console.log(dataset);
 
   var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
@@ -821,8 +823,8 @@ function initializeUniversityGraph() {
       bottom: 200,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 2,
-    height = (window.innerHeight - margin.top - margin.bottom) / 3;
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   svgUni = d3v5.select(".universitygraph").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -845,22 +847,26 @@ function updateUniversityGraph() {
       bottom: 200,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 2,
-    height = (window.innerHeight - margin.top - margin.bottom) / 3;
+    width = (window.innerWidth - margin.left - margin.right) / 3,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2;
 
   var universityCount;
   switch (view) {
     case 'world':
-      universityCount = getStudentCountPerUniversityTotal();
+      universityCount = getStudentCountPerUniversityTotal(10);
       break;
     case 'country':
-      universityCount = getStudentCountPerUniversityCountry(selectedCountry);
+      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 10);
+      break;
+    case 'university':
+      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 10);
       break;
     default:
-      universityCount = getStudentCountPerUniversityTotal();
+      universityCount = getStudentCountPerUniversityTotal(10);
   }
+  //console.log(universityCount);
 
-  var dataset = d3.layout.stack()(getSelectedFaculties().map(function(faculty) {
+  var dataset = d3.layout.stack()(getAllFaculties(true).map(function(faculty) {
     return universityCount.map(function(d) {
       return {
         x: d.university,
@@ -868,6 +874,7 @@ function updateUniversityGraph() {
       };
     });
   }));
+  //console.log(dataset);
 
   var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
@@ -886,10 +893,15 @@ function updateUniversityGraph() {
     .range([height, 0]);
 
   var colors = [];
-  var colorScale = getFacultyColors();
-  getSelectedFaculties().forEach(function(faculty) {
-    colors.push({"faculty": faculty, "color": colorScale(faculty)})
+  var colorScale = getFacultyColors(true);
+  getAllFaculties(true).forEach(function(faculty, i) {
+    colors.push({
+      "faculty": faculty,
+      "color": colorScale(faculty),
+      "i": i
+    })
   });
+  //console.log(colors);
 
   // Define and draw axes
   var yAxis = d3.svg.axis()
@@ -935,7 +947,10 @@ function updateUniversityGraph() {
   groups.enter().append("g")
     .attr("class", "cost")
     .style("fill", function(d, i) {
-      return colors[i].color;
+      var color = colors.find(obj => {
+        return obj.i === i;
+      });
+      return color.color;
     });
 
   var rect = groups.selectAll("rect")
@@ -1343,13 +1358,16 @@ function getStudentCountPerFacultyUniversity(university) {
   return yearlyCountPerUniversity;
 }
 
-function getStudentCountPerUniversityTotal() {
+function getStudentCountPerUniversityTotal(max) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Uitwisselingsinstelling;
     })
     .key(function(d) {
-      return d.Faculteit;
+      var newFac = d.Faculteit.replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      return newFac;
     })
     .rollup(function(leaves) {
       return leaves.length;
@@ -1371,12 +1389,12 @@ function getStudentCountPerUniversityTotal() {
     return b.total - a.total;
   });
 
-  if (yearlyCount.length > 10)
-    yearlyCount.length = 10;
+  if (yearlyCount.length > max)
+    yearlyCount.length = max;
   return yearlyCount;
 }
 
-function getStudentCountPerUniversityCountry(country) {
+function getStudentCountPerUniversityCountry(country, max) {
   var yearlyCount = d3.nest()
     .key(function(d) {
       return d.Land;
@@ -1385,7 +1403,10 @@ function getStudentCountPerUniversityCountry(country) {
       return d.Uitwisselingsinstelling;
     })
     .key(function(d) {
-      return d.Faculteit;
+      var newFac = d.Faculteit.replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      return newFac;
     })
     .rollup(function(leaves) {
       return leaves.length;
@@ -1411,8 +1432,8 @@ function getStudentCountPerUniversityCountry(country) {
     return b.total - a.total;
   });
 
-  if (yearlyCountPerCountry.length > 10)
-    yearlyCountPerCountry.length = 10;
+  if (yearlyCountPerCountry.length > max)
+    yearlyCountPerCountry.length = max;
   return yearlyCountPerCountry;
 }
 
@@ -1460,6 +1481,23 @@ function getSelectedFaculties(filter) {
     }
   });
   return selectedFaculties;
+}
+
+function getAllFaculties(filter) {
+  var allFaculties = [];
+  d3.selectAll(".myCheckbox").each(function(d) {
+    cb = d3.select(this);
+    if (!filter) {
+      allFaculties.push(cb.property("value"));
+    } else {
+      var newFac = cb.property("value").replace("Fac. ", "");
+      newFac = newFac.replace("Faculteit ", "");
+      newFac = newFac.replace("Hoger Instituut voor ", "");
+      allFaculties.push(newFac);
+    }
+
+  });
+  return allFaculties;
 }
 
 function toggleSidebar() {
@@ -1534,25 +1572,46 @@ function getHighestCount(yearlyCount) {
 }
 
 //TODO
-function getFacultyColors() {
-  var faculties = [
-    "Totaal",
-    "Fac. Psychologie en Pedagogische Wet.",
-    "Faculteit Geneeskunde",
-    "Faculteit Rechtsgeleerdheid",
-    "Faculteit Economie en Bedrijfswetensch.",
-    "Faculteit Ingenieurswetenschappen",
-    "Faculteit Letteren",
-    "Faculteit Wetenschappen",
-    "Faculteit Farmaceutische Wetenschappen",
-    "Faculteit Theologie en Religiewetensch.",
-    "Hoger Instituut voor Wijsbegeerte",
-    "FaBeR",
-    "Faculteit Sociale Wetenschappen",
-    "Faculteit Bio-ingenieurswetenschappen",
-    "Fac. Industriële Ingenieurswetenschappen",
-    "Faculteit Architectuur"
-  ]
+function getFacultyColors(filter) {
+  if (!filter) {
+    var faculties = [
+      "Totaal",
+      "Fac. Psychologie en Pedagogische Wet.",
+      "Faculteit Geneeskunde",
+      "Faculteit Rechtsgeleerdheid",
+      "Faculteit Economie en Bedrijfswetensch.",
+      "Faculteit Ingenieurswetenschappen",
+      "Faculteit Letteren",
+      "Faculteit Wetenschappen",
+      "Faculteit Farmaceutische Wetenschappen",
+      "Faculteit Theologie en Religiewetensch.",
+      "Hoger Instituut voor Wijsbegeerte",
+      "FaBeR",
+      "Faculteit Sociale Wetenschappen",
+      "Faculteit Bio-ingenieurswetenschappen",
+      "Fac. Industriële Ingenieurswetenschappen",
+      "Faculteit Architectuur"
+    ]
+  } else {
+    var faculties = [
+      "Totaal",
+      "Psychologie en Pedagogische Wet.",
+      "Geneeskunde",
+      "Rechtsgeleerdheid",
+      "Economie en Bedrijfswetensch.",
+      "Ingenieurswetenschappen",
+      "Letteren",
+      "Wetenschappen",
+      "Farmaceutische Wetenschappen",
+      "Theologie en Religiewetensch.",
+      "Wijsbegeerte",
+      "FaBeR",
+      "Sociale Wetenschappen",
+      "Bio-ingenieurswetenschappen",
+      "Industriële Ingenieurswetenschappen",
+      "Architectuur"
+    ]
+  }
 
   /*var color = d3.scale.ordinal()
     .domain(faculties)
