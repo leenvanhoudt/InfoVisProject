@@ -40,26 +40,6 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
     update();
   });
 
-  function update() {
-    selectedData = updateSelectedData(csv_data, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
-    var dataset = makeDataset(selectedData);
-    if (Object.keys(dataset).length === 0) {
-      dataset = makeDummySet(csv_data);
-    }
-    overviewMap.updateChoropleth(dataset);
-
-    if (view == 'country' || view == 'university') {
-      zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
-      //graphs en text worden geupdate in de zoomToCountry function
-    } else {
-      updateStudentCountGraph(yearSelected[0], yearSelected[1]);
-      updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
-      //TODO
-      updateFacultyGraph();
-      updateUniversityGraph();
-    }
-  }
-
   function checkAll() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.selectAll(".myCheckbox").property("checked", true);
@@ -107,8 +87,8 @@ function update() {
   } else {
     updateStudentCountGraph(yearSelected[0], yearSelected[1]);
     updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
-    //TODO
     updateFacultyGraph();
+    resetSmallMap();
   }
 }
 
@@ -192,6 +172,7 @@ function initializeView(dataset) {
   //TODO
   initializeFacultyGraph();
   initializeUniversityGraph();
+  resetSmallMap();
 }
 
 function initializeMaps(dataset) {
@@ -1033,6 +1014,46 @@ function updateUniversityGraph() {
 
 }
 
+function resetSmallMap(){
+  var dataset = {'BEL': {fillKey: 'Belgium'}};
+  var fills = {defaultFill: '#F5F5F5', Belgium: '#3FB8AF', 'BEL': 'Belgium'};
+  $("#container2").empty();
+  zoomedMap = new Datamap({
+    //scope: 'world',
+    element: document.getElementById('container2'),
+    //set projection to Europe
+    setProjection: function(element, options) {
+      var projection = d3.geo.mercator()
+        .center([5,51])
+        .scale(1400)
+        .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
+      var path = d3.geo.path()
+        .projection(projection);
+      return {
+        path: path,
+        projection: projection
+      };
+    },
+    height: 300,
+    fills: fills,
+    data: dataset,
+    geographyConfig: {
+      borderColor: '#DEDEDE',
+      highlightBorderWidth: 3,
+      // don't change color on mouse hover
+      highlightFillColor: function(geo) {
+        return fillsZoom[geo.fillKey] || '#F5F5F5';
+      },
+      // only change border
+      highlightBorderColor: false, //'#B7B7B7',
+      // show desired information in tooltip
+      popupTemplate: function(geo, data) {
+        return;
+      }
+    }
+  });
+}
+
 function zoomToCountry(country, coordinates, dataset) {
   addCountryBreadcrumb();
   updateStudentCountGraph(yearSelected[0], yearSelected[1]);
@@ -1582,6 +1603,10 @@ function addCountryBreadcrumb() {
     li = document.createElement('li');
     li.setAttribute('id', "countryBreadcrumb");
     document.getElementById('breadcrumbs').appendChild(li);
+  }
+  var nextLi = document.getElementById("universityBreadcrumb");
+  if (nextLi != null) {
+    removeElement("universityBreadcrumb");
   }
 
   li.innerHTML = selectedCountry;
