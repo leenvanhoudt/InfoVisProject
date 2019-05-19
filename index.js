@@ -86,7 +86,7 @@ function update() {
   selectedData = updateSelectedData(originalData, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
   var dataset = makeDataset(selectedData);
   if (Object.keys(dataset).length === 0) {
-    dataset = makeDummySet(csv_data);
+    dataset = makeDummySet(originalData);
   }
   overviewMap.updateChoropleth(dataset);
 
@@ -355,7 +355,7 @@ function updateStudentCountGraph(begin, end) {
         yRange = yearlyCount;
         highestCount = getHighestCount(yearlyCount);
       }
-      if(getYearRange(yearlyCount)[0]<=start && getYearRange(yearlyCount)[1]>=end){
+      if(yearlyCount.length>0 && getYearRange(yearlyCount)[0]<=start && getYearRange(yearlyCount)[1]>=end){
         xRange = yearlyCount;
         start = getYearRange(yearlyCount)[0];
         end = getYearRange(yearlyCount)[1];
@@ -1063,7 +1063,7 @@ function resetSmallMap(){
       highlightBorderWidth: 3,
       // don't change color on mouse hover
       highlightFillColor: function(geo) {
-        return fillsZoom[geo.fillKey] || '#F5F5F5';
+        return fills[geo.fillKey] || '#F5F5F5';
       },
       // only change border
       highlightBorderColor: false, //'#B7B7B7',
