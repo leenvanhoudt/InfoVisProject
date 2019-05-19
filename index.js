@@ -1229,8 +1229,13 @@ function getStudentCountPerYearCountry(data, country) {
     .entries(data);
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
-  }).values;
-  return yearlyCountPerCountry;
+  });
+  if(yearlyCountPerCountry==undefined){
+    return [];
+  } else {
+    return yearlyCountPerCountry.values;
+  }
+  
 }
 
 function getStudentCountPerYearUniversity(data, university) {
@@ -1247,8 +1252,12 @@ function getStudentCountPerYearUniversity(data, university) {
     .entries(data);
   var yearlyCountPerUniversity = studentCount.find(obj => {
     return obj.key === university;
-  }).values;
-  return yearlyCountPerUniversity;
+  });
+  if(yearlyCountPerUniversity==undefined){
+    return [];
+  } else {
+    return yearlyCountPerUniversity.values;
+  }
 }
 
 function getStudentCountPerFacultyTotal() {
