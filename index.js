@@ -68,6 +68,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkRadioButtonComparison() {
     d3.select(".radioTotal").property("checked", false)
     d3.select(".radioComparison").property("checked", true)
+    document.getElementById("container3").style.visibility = "hidden";
     allFacultiesSelected = false;
     update();
   }
@@ -75,6 +76,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkRadioButtonTotal() {
     d3.select(".radioTotal").property("checked", true)
     d3.select(".radioComparison").property("checked", false)
+    document.getElementById("container3").style.visibility = "visible";
     allFacultiesSelected = true;
     update();
   }
@@ -189,8 +191,8 @@ function initializeMaps(dataset) {
     //set projection to Europe
     setProjection: function(element, options) {
       var projection = d3.geo.mercator()
-        .center([10, 52])
-        .scale(700)
+        .center([10, 50])
+        .scale(600)
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
         .projection(projection);
@@ -214,7 +216,7 @@ function initializeMaps(dataset) {
         });
       });
     },
-    height: 550,
+    height: 400,
     fills: {
       defaultFill: '#F5F5F5'
     },
@@ -250,10 +252,10 @@ function initializeStudentCountGraph() {
       top: 50,
       right: 50,
       bottom: 50,
-      left: 50
+      left: 80
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3 + 200,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 3 + 180,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2 - 50;
 
   svg = d3v5.select(".linegraph").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -278,7 +280,7 @@ function initializeStudentCountGraph() {
   svg.append("text")
     .attr("class", "axis label")
     .attr("text-anchor", "end")
-    .attr("x", width - 200)
+    .attr("x", width - 250)
     .attr("y", height + margin.top - 10)
     .text("Jaar");
 
@@ -303,7 +305,7 @@ function initializeStudentCountGraph() {
   svg.append("g")
     .attr("class", "legend")
     .attr("transform", function(d, i) {
-      return "translate(30," + i * 19 + ")";
+      return "translate(40," + i * 19 + ")";
     });
 
   // Nodes
@@ -320,8 +322,8 @@ function updateStudentCountGraph(begin, end) {
       bottom: 50,
       left: 50
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 3 - 50,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2 - 50;
 
   //number of datapoints
   var n = end - begin;
@@ -486,7 +488,8 @@ function updateLegend(data, width) {
     .attr("dy", ".35em")
     .style("text-anchor", "start")
     .text(function(d) {
-      return d.key;
+      var shortFaculties = getFacultiesShorterNames();
+      return shortFaculties[d.key];
     });
 }
 
@@ -565,13 +568,13 @@ function updateNodes(data, x, y) {
 
 function initializeFacultyGraph() {
   var margin = {
-      top: 20,
-      right: 100,
-      bottom: 200,
-      left: 100
+      top: 50,
+      right: 50,
+      bottom: 180,
+      left: 80
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 3 + 150,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2 - 50;
 
   svgBar = d3v5.select(".facultygraph").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -597,13 +600,13 @@ function initializeFacultyGraph() {
 
 function updateFacultyGraph() {
   var margin = {
-      top: 20,
-      right: 100,
-      bottom: 200,
-      left: 100
+      top: 50,
+      right: 50,
+      bottom: 180,
+      left: 50
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 3 - 50,
+    height = (window.innerHeight - margin.top - margin.bottom) / 2 - 50;
 
   var facultyCount;
   switch (view) {
@@ -647,7 +650,8 @@ function updateFacultyGraph() {
 
   //var colors = d3v5.schemeCategory10;
   //colors.length = 7;
-  var colors = ["#ecf8f8", "#3baba3", "#c6ebe9", "#2e857e", "#7ad1cb", "#215f5a", "#a0deda"];
+  //var colors = ["#ecf8f8", "#3baba3", "#c6ebe9", "#2e857e", "#7ad1cb", "#215f5a", "#a0deda"];
+  var colors = ["#3fb7ae", "#0a4f4e", "#9dd84e", "#2f882d", "#2ce462", "#304f9b", "#83acf3"];
   /*var colors = [
     "#576A8A",
     "#56CE96",
@@ -684,7 +688,7 @@ function updateFacultyGraph() {
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
     .attr("dy", "-5em")
-    .attr("dx", "-15em")
+    .attr("dx", "-10em")
     .style("text-anchor", "start")
     .text("Aantal studenten");
 
@@ -1032,7 +1036,7 @@ function resetSmallMap(){
     setProjection: function(element, options) {
       var projection = d3.geo.mercator()
         .center([5,51])
-        .scale(1400)
+        .scale(1500)
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
         .projection(projection);
@@ -1041,7 +1045,7 @@ function resetSmallMap(){
         projection: projection
       };
     },
-    height: 300,
+    height: 250,
     fills: fills,
     data: dataset,
     geographyConfig: {
@@ -1140,7 +1144,7 @@ function zoomToCountry(country, coordinates, dataset) {
         projection: projection
       };
     },
-    height: 300,
+    height: 250,
     fills: fillsZoom,
     data: datasetZoom,
     geographyConfig: {
@@ -1595,7 +1599,7 @@ function getFacultyColors() {
     .domain(faculties)
     .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
   var color = d3v5.scaleOrdinal().domain(faculties)
-    .range(['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000']);
+    .range(['#3FB8AF','#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3']);
   //.range(["rgb(114,229,239)", "rgb(44,74,94)", "rgb(115,240,46)", "rgb(128,25,103)", "rgb(153,214,131)", "rgb(212,95,234)", "rgb(89,146,58)", "rgb(113,37,189)", "rgb(243,197,250)", "rgb(19,90,194)", "rgb(28,241,163)", "rgb(147,49,28)", "rgb(255,162,112)", "rgb(11,83,19)", "rgb(250,85,122)"]);
   //.range(["rgb(82,239,153)", "rgb(16,75,109)", "rgb(165,203,235)", "rgb(21,81,38)", "rgb(35,219,225)", "rgb(119,49,41)", "rgb(181,226,135)", "rgb(214,7,36)", "rgb(12,168,46)", "rgb(95,134,183)", "rgb(76,243,44)", "rgb(214,118,94)", "rgb(120,157,35)", "rgb(5,149,122)", "rgb(248,204,166)"]);
   //.range(["rgb(160,227,183)", "rgb(17,103,126)", "rgb(152,218,29)", "rgb(43,114,231)", "rgb(163,201,254)", "rgb(37,107,51)", "rgb(28,241,163)", "rgb(90,67,22)", "rgb(32,216,253)", "rgb(46,229,45)", "rgb(162,127,39)", "rgb(220,218,94)", "rgb(210,197,171)", "rgb(255,185,71)","rgb(214,7,36)"]);
@@ -1656,4 +1660,33 @@ function switchToWorldView() {
 function removeElement(elementId) {
   var element = document.getElementById(elementId);
   element.parentNode.removeChild(element);
+}
+
+function getFacultiesShorterNames() {
+  var faculties = [
+    "Totaal",
+    "Fac. Psychologie en Pedagogische Wet.",
+    "Faculteit Geneeskunde",
+    "Faculteit Rechtsgeleerdheid",
+    "Faculteit Economie en Bedrijfswetensch.",
+    "Faculteit Ingenieurswetenschappen",
+    "Faculteit Letteren",
+    "Faculteit Wetenschappen",
+    "Faculteit Farmaceutische Wetenschappen",
+    "Faculteit Theologie en Religiewetensch.",
+    "Hoger Instituut voor Wijsbegeerte",
+    "FaBeR",
+    "Faculteit Sociale Wetenschappen",
+    "Faculteit Bio-ingenieurswetenschappen",
+    "Fac. Industriële Ingenieurswetenschappen",
+    "Faculteit Architectuur"
+  ]
+  shortFaculties = {};
+  faculties.forEach(function(faculty) {
+    var newFac = faculty.replace("Fac. ", "");
+    newFac = newFac.replace("Faculteit ", "");
+    newFac = newFac.replace("Hoger Instituut voor ", "");
+    shortFaculties[faculty] = newFac;
+  })
+  return shortFaculties;
 }
