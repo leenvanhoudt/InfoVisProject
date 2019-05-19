@@ -356,7 +356,7 @@ function updateStudentCountGraph(begin, end) {
         yRange = yearlyCount;
         highestCount = getHighestCount(yearlyCount);
       }
-      if(yearlyCount.length>0 && getYearRange(yearlyCount)[0]<=start && getYearRange(yearlyCount)[1]>=end){
+      if (yearlyCount.length > 0 && getYearRange(yearlyCount)[0] <= start && getYearRange(yearlyCount)[1] >= end) {
         xRange = yearlyCount;
         start = getYearRange(yearlyCount)[0];
         end = getYearRange(yearlyCount)[1];
@@ -647,7 +647,7 @@ function updateFacultyGraph() {
     .domain(dataset[0].map(function(d) {
       return d.x;
     }).sort())
-    .rangeRoundBands([10, width - 10], 0.02);
+    .rangeRoundBands([10, width - 10], 0.1);
 
   var yTicks = getSmartTicks(d3.max(dataset, function(d) {
     return d3.max(d, function(d) {
@@ -824,8 +824,8 @@ function initializeUniversityGraph() {
       bottom: 200,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 5,
+    height = (window.innerHeight - margin.top - margin.bottom) / 4;
 
   svgUni = d3v5.select(".universitygraph").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -848,8 +848,8 @@ function updateUniversityGraph() {
       bottom: 200,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 3,
-    height = (window.innerHeight - margin.top - margin.bottom) / 2;
+    width = (window.innerWidth - margin.left - margin.right) / 5,
+    height = (window.innerHeight - margin.top - margin.bottom) / 4;
 
   var universityCount;
   switch (view) {
@@ -875,21 +875,21 @@ function updateUniversityGraph() {
     });
   }));
 
-  var x = d3.scale.ordinal()
+  var y = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
       return d.x;
     }))
-    .rangeRoundBands([10, width - 10], 0.02);
+    .rangeRoundBands([10, width - 10], 0.1);
 
-  var yTicks = getSmartTicks(d3.max(dataset, function(d) {
+  var xTicks = getSmartTicks(d3.max(dataset, function(d) {
     return d3.max(d, function(d) {
       return d.y0 + d.y;
     });
   }), height);
 
-  var y = d3.scale.linear()
-    .domain([0, yTicks.endPoint])
-    .range([height, 0]);
+  var x = d3.scale.linear()
+    .domain([0, xTicks.endPoint])
+    .range([0, width]);
 
   var colors = [];
   var colorScale = getFacultyColors(true);
@@ -905,14 +905,14 @@ function updateUniversityGraph() {
   var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .ticks(yTicks.count)
-    .tickSize(-width, 0, 0)
     .tickFormat(function(d) {
       return d
     });
 
   var xAxis = d3.svg.axis()
     .scale(x)
+    .ticks(xTicks.count)
+    .tickSize(-width, 0, 0)
     .orient("bottom")
     .tickFormat(function(d) {
       return d
@@ -920,6 +920,14 @@ function updateUniversityGraph() {
 
   svgUni.select(".y.axis")
     .call(yAxis)
+    .selectAll("text")
+    .style("text-anchor", "end")
+    .attr("dx", "-.9em")
+    .attr("dy", ".25em")
+    .attr("transform", "rotate(-50)");
+
+  svgUni.select(".x.axis")
+    .call(xAxis)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
@@ -927,14 +935,6 @@ function updateUniversityGraph() {
     .attr("dx", "-15em")
     .style("text-anchor", "end")
     .text("Students");
-
-  svgUni.select(".x.axis")
-    .call(xAxis)
-    .selectAll("text")
-    .style("text-anchor", "end")
-    .attr("dx", "-.9em")
-    .attr("dy", ".25em")
-    .attr("transform", "rotate(-50)");
 
   // Create groups for each series, rects for each segment
   var groups = svgUni.selectAll("g.cost")
@@ -960,29 +960,29 @@ function updateUniversityGraph() {
     .remove();
 
   rect.attr("class", "rect")
-    .attr("x", function(d) {
-      return x(d.x);
-    })
     .attr("y", function(d) {
-      return y(d.y0 + d.y);
+      return y(d.x);
     })
-    .attr("height", function(d) {
-      return -y(d.y0 + d.y) + y(d.y0);
+    .attr("x", function(d) {
+      return x(d.y0);
     })
-    .attr("width", x.rangeBand());
+    .attr("width", function(d) {
+      return x(d.y0 + d.y) - x(d.y0);
+    })
+    .attr("height", y.rangeBand());
 
   rect.enter()
     .append("rect")
-    .attr("x", function(d) {
-      return x(d.x);
-    })
     .attr("y", function(d) {
-      return y(d.y0 + d.y);
+      return y(d.x);
     })
-    .attr("height", function(d) {
-      return -y(d.y0 + d.y) + y(d.y0);
+    .attr("x", function(d) {
+      return x(d.y0);
     })
-    .attr("width", x.rangeBand())
+    .attr("width", function(d) {
+      return x(d.y0 + d.y) - x(d.y0);
+    })
+    .attr("height", y.rangeBand())
     .on("mouseover", function(d) {
       tooltip.style("display", null);
     })
@@ -1046,9 +1046,17 @@ function updateUniversityGraph() {
 
 }
 
-function resetSmallMap(){
-  var dataset = {'BEL': {fillKey: 'Belgium'}};
-  var fills = {defaultFill: '#F5F5F5', Belgium: '#3FB8AF', 'BEL': 'Belgium'};
+function resetSmallMap() {
+  var dataset = {
+    'BEL': {
+      fillKey: 'Belgium'
+    }
+  };
+  var fills = {
+    defaultFill: '#F5F5F5',
+    Belgium: '#3FB8AF',
+    'BEL': 'Belgium'
+  };
   $("#container2").empty();
   zoomedMap = new Datamap({
     //scope: 'world',
@@ -1056,7 +1064,7 @@ function resetSmallMap(){
     //set projection to Europe
     setProjection: function(element, options) {
       var projection = d3.geo.mercator()
-        .center([5,51])
+        .center([5, 51])
         .scale(1500)
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
@@ -1283,7 +1291,7 @@ function getStudentCountPerYearCountry(data, country) {
   var yearlyCountPerCountry = yearlyCount.find(obj => {
     return obj.key === country;
   });
-  if(yearlyCountPerCountry==undefined){
+  if (yearlyCountPerCountry == undefined) {
     return [];
   } else {
     return yearlyCountPerCountry.values;
@@ -1306,7 +1314,7 @@ function getStudentCountPerYearUniversity(data, university) {
   var yearlyCountPerUniversity = studentCount.find(obj => {
     return obj.key === university;
   });
-  if(yearlyCountPerUniversity==undefined){
+  if (yearlyCountPerUniversity == undefined) {
     return [];
   } else {
     return yearlyCountPerUniversity.values;
@@ -1620,8 +1628,8 @@ function getHighestCount(yearlyCount) {
 
 function getYearRange(yearlyCount) {
   var start = yearlyCount[0].key;
-  var end = yearlyCount[Object.keys(yearlyCount).length-1].key;
-  return [start,end];
+  var end = yearlyCount[Object.keys(yearlyCount).length - 1].key;
+  return [start, end];
 }
 
 //TODO
@@ -1670,7 +1678,7 @@ function getFacultyColors(filter) {
     .domain(faculties)
     .range(['#3FB8AF',"#18c61a", "#9817ff", "#d31911", "#24b7f1", "#fa82ce", "#736c31", "#1263e2", "#18c199", "#ed990a", "#f2917f", "#7b637c", "#a8b311", "#a438c0", "#d00d5e", "#1e7b1d"]);*/
   var color = d3v5.scaleOrdinal().domain(faculties)
-    .range(['#3FB8AF','#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3']);
+    .range(['#3FB8AF', '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3']);
   //.range(["rgb(114,229,239)", "rgb(44,74,94)", "rgb(115,240,46)", "rgb(128,25,103)", "rgb(153,214,131)", "rgb(212,95,234)", "rgb(89,146,58)", "rgb(113,37,189)", "rgb(243,197,250)", "rgb(19,90,194)", "rgb(28,241,163)", "rgb(147,49,28)", "rgb(255,162,112)", "rgb(11,83,19)", "rgb(250,85,122)"]);
   //.range(["rgb(82,239,153)", "rgb(16,75,109)", "rgb(165,203,235)", "rgb(21,81,38)", "rgb(35,219,225)", "rgb(119,49,41)", "rgb(181,226,135)", "rgb(214,7,36)", "rgb(12,168,46)", "rgb(95,134,183)", "rgb(76,243,44)", "rgb(214,118,94)", "rgb(120,157,35)", "rgb(5,149,122)", "rgb(248,204,166)"]);
   //.range(["rgb(160,227,183)", "rgb(17,103,126)", "rgb(152,218,29)", "rgb(43,114,231)", "rgb(163,201,254)", "rgb(37,107,51)", "rgb(28,241,163)", "rgb(90,67,22)", "rgb(32,216,253)", "rgb(46,229,45)", "rgb(162,127,39)", "rgb(220,218,94)", "rgb(210,197,171)", "rgb(255,185,71)","rgb(214,7,36)"]);
