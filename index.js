@@ -59,7 +59,7 @@ d3.csv("Datasets/Erasmus Data/Dataset Bert Willems/UIT Totaal (Filtered).csv", f
   function checkSingle() {
     if (d3.select(".allCheckbox").property("checked")) {
       d3.select(".allCheckbox").property("checked", false);
-    } else if (d3.selectAll(".myCheckbox").property("checked")) {
+    } else if ($("input.myCheckbox").not(":checked").length === 0) {
       d3.select(".allCheckbox").property("checked", true);
     }
     update();
@@ -86,7 +86,7 @@ function update() {
   selectedData = updateSelectedData(originalData, yearSelected[0], yearSelected[1], getSelectedFaculties(false));
   var dataset = makeDataset(selectedData);
   if (Object.keys(dataset).length === 0) {
-    dataset = makeDummySet(csv_data);
+    dataset = makeDummySet(originalData);
   }
   overviewMap.updateChoropleth(dataset);
 
@@ -97,6 +97,7 @@ function update() {
     updateStudentCountGraph(yearSelected[0], yearSelected[1]);
     updateText(yearSelected[0], yearSelected[1], countStudentsTotal(dataset));
     updateFacultyGraph();
+    updateUniversityGraph();
     resetSmallMap();
   }
 }
@@ -622,7 +623,6 @@ function updateFacultyGraph() {
     default:
       facultyCount = getStudentCountPerFacultyTotal();
   }
-  console.log(facultyCount);
 
   var dataset = d3.layout.stack()([2012, 2013, 2014, 2015, 2016, 2017, 2018].map(function(year) {
     return facultyCount.map(function(d) {
@@ -632,7 +632,6 @@ function updateFacultyGraph() {
       };
     });
   }));
-  console.log(dataset);
 
   var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
@@ -856,7 +855,6 @@ function updateUniversityGraph() {
     default:
       universityCount = getStudentCountPerUniversityTotal(10);
   }
-  //console.log(universityCount);
 
   var dataset = d3.layout.stack()(getAllFaculties(true).map(function(faculty) {
     return universityCount.map(function(d) {
@@ -866,7 +864,6 @@ function updateUniversityGraph() {
       };
     });
   }));
-  //console.log(dataset);
 
   var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
@@ -893,7 +890,6 @@ function updateUniversityGraph() {
       "i": i
     })
   });
-  //console.log(colors);
 
   // Define and draw axes
   var yAxis = d3.svg.axis()
@@ -1068,7 +1064,7 @@ function resetSmallMap(){
       highlightBorderWidth: 3,
       // don't change color on mouse hover
       highlightFillColor: function(geo) {
-        return fillsZoom[geo.fillKey] || '#F5F5F5';
+        return fills[geo.fillKey] || '#F5F5F5';
       },
       // only change border
       highlightBorderColor: false, //'#B7B7B7',
@@ -1282,7 +1278,7 @@ function getStudentCountPerYearCountry(data, country) {
   } else {
     return yearlyCountPerCountry.values;
   }
-  
+
 }
 
 function getStudentCountPerYearUniversity(data, university) {
