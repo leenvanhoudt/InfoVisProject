@@ -919,7 +919,7 @@ function initializeUniversityGraph() {
 
   svgUni.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(0," + width + ")");
+    .attr("transform", "translate(0," + height + ")");
 }
 
 function updateUniversityGraph() {
@@ -935,16 +935,16 @@ function updateUniversityGraph() {
   var universityCount;
   switch (view) {
     case 'world':
-      universityCount = getStudentCountPerUniversityTotal(10);
+      universityCount = getStudentCountPerUniversityTotal(5);
       break;
     case 'country':
-      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 10);
+      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 5);
       break;
     case 'university':
-      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 10);
+      universityCount = getStudentCountPerUniversityCountry(selectedCountry, 5);
       break;
     default:
-      universityCount = getStudentCountPerUniversityTotal(10);
+      universityCount = getStudentCountPerUniversityTotal(5);
   }
 
   var dataset = d3.layout.stack()(getAllFaculties(true).map(function(faculty) {
@@ -956,35 +956,36 @@ function updateUniversityGraph() {
     });
   }));
 
-  var y = d3.scale.ordinal()
+  var x = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
       return d.x;
     }))
     .rangeRoundBands([10, width - 10], 0.1);
 
-  var xTicks = getSmartTicks(d3.max(dataset, function(d) {
+  var yTicks = getSmartTicks(d3.max(dataset, function(d) {
     return d3.max(d, function(d) {
       return d.y0 + d.y;
     });
   }), height);
 
-  var x = d3.scale.linear()
-    .domain([0, xTicks.endPoint])
-    .range([0, width]);
+  var y = d3.scale.linear()
+    .domain([0, yTicks.endPoint])
+    .range([height, 0]);
 
   var colors = [];
   var colorScale = getFacultyColors(true);
   getAllFaculties(true).forEach(function(faculty, i) {
     colors.push({
       "faculty": faculty,
-      "color": colorScale(faculty),
-      "i": i
+      "color": colorScale(faculty)
     })
   });
 
   // Define and draw axes
   var yAxis = d3.svg.axis()
     .scale(y)
+    .ticks(yTicks.count)
+    .tickSize(-width, 0, 0)
     .orient("left")
     .tickFormat(function(d) {
       return d
@@ -992,8 +993,6 @@ function updateUniversityGraph() {
 
   var xAxis = d3.svg.axis()
     .scale(x)
-    .ticks(xTicks.count)
-    .tickSize(-width, 0, 0)
     .orient("bottom")
     .tickFormat(function(d) {
       return d
@@ -1001,14 +1000,6 @@ function updateUniversityGraph() {
 
   svgUni.select(".y.axis")
     .call(yAxis)
-    .selectAll("text")
-    .style("text-anchor", "end")
-    .attr("dx", "-.9em")
-    .attr("dy", ".25em")
-    .attr("transform", "rotate(-50)");
-
-  svgUni.select(".x.axis")
-    .call(xAxis)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
@@ -1016,6 +1007,12 @@ function updateUniversityGraph() {
     .attr("dx", "-15em")
     .style("text-anchor", "end")
     .text("Students");
+
+
+  svgUni.select(".x.axis")
+    .call(xAxis)
+    .selectAll("text")
+    .call(wrap, x.rangeBand());
 
   // Create groups for each series, rects for each segment
   var groups = svgUni.selectAll("g.cost")
@@ -1026,10 +1023,7 @@ function updateUniversityGraph() {
   groups.enter().append("g")
     .attr("class", "cost")
     .style("fill", function(d, i) {
-      var color = colors.find(obj => {
-        return obj.i === i;
-      });
-      return color.color;
+      return colors[i].color;
     });
 
   var rect = groups.selectAll("rect")
@@ -1041,29 +1035,29 @@ function updateUniversityGraph() {
     .remove();
 
   rect.attr("class", "rect")
-    .attr("y", function(d) {
-      return y(d.x);
-    })
     .attr("x", function(d) {
-      return x(d.y0);
+      return x(d.x);
     })
-    .attr("width", function(d) {
-      return x(d.y0 + d.y) - x(d.y0);
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
     })
-    .attr("height", y.rangeBand());
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand());
 
   rect.enter()
     .append("rect")
-    .attr("y", function(d) {
-      return y(d.x);
-    })
     .attr("x", function(d) {
-      return x(d.y0);
+      return x(d.x);
     })
-    .attr("width", function(d) {
-      return x(d.y0 + d.y) - x(d.y0);
+    .attr("y", function(d) {
+      return y(d.y0 + d.y);
     })
-    .attr("height", y.rangeBand())
+    .attr("height", function(d) {
+      return -y(d.y0 + d.y) + y(d.y0);
+    })
+    .attr("width", x.rangeBand())
     .on("mouseover", function(d) {
       tooltip.style("display", null);
     })
@@ -1849,4 +1843,28 @@ function getFacultiesShorterNames() {
     shortFaculties[faculty] = newFac;
   })
   return shortFaculties;
+}
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+      words = text.text().split(/\s+/).reverse(),
+      word,
+      line = [],
+      lineNumber = 0,
+      lineHeight = 1.1, // ems
+      y = text.attr("y"),
+      dy = parseFloat(text.attr("dy")),
+      tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
 }
