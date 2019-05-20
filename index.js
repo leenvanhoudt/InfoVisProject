@@ -330,12 +330,12 @@ function getHeatmapRange(dataset) {
   var maxCountry;
   var min = 2000;
   var minCountry;
-  for(country in dataset){
-    if(country!='BEL'){
-      if(dataset[country].numberOfStudents>max){
+  for (country in dataset) {
+    if (country != 'BEL') {
+      if (dataset[country].numberOfStudents > max) {
         maxCountry = dataset[country];
         max = dataset[country].numberOfStudents
-      }else if(dataset[country].numberOfStudents<min){
+      } else if (dataset[country].numberOfStudents < min) {
         minCountry = dataset[country];
         min = dataset[country].numberOfStudents;
       }
@@ -916,17 +916,12 @@ function updateFacultyGraph() {
 function initializeUniversityGraph() {
   var margin = {
       top: 50,
-<<<<<<< HEAD
       right: 50,
-      bottom: 100,
-=======
-      right: 200,
       bottom: 50,
->>>>>>> 23d375710c3b48440365de94b05b4c10a723ea02
-      left: 50
+      left: 100
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
-    height = (window.innerHeight - margin.top - margin.bottom) / 4;
+    height = (window.innerHeight - margin.top - margin.bottom) / 3;
 
   svgUni = d3v5.select(".topUniversitiesGraph").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -945,17 +940,12 @@ function initializeUniversityGraph() {
 function updateUniversityGraph() {
   var margin = {
       top: 50,
-<<<<<<< HEAD
       right: 50,
-      bottom: 100,
-=======
-      right: 100,
       bottom: 50,
->>>>>>> 23d375710c3b48440365de94b05b4c10a723ea02
-      left: 50
+      left: 100
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
-    height = (window.innerHeight - margin.top - margin.bottom) / 4;
+    height = (window.innerHeight - margin.top - margin.bottom) / 3;
 
   var universityCount;
   switch (view) {
@@ -981,21 +971,21 @@ function updateUniversityGraph() {
     });
   }));
 
-  var x = d3.scale.ordinal()
+  var y = d3.scale.ordinal()
     .domain(dataset[0].map(function(d) {
       return d.x;
     }))
-    .rangeRoundBands([10, width - 10], 0.1);
+    .rangeRoundBands([10, height - 10], 0.1);
 
-  var yTicks = getSmartTicks(d3.max(dataset, function(d) {
+  var xTicks = getSmartTicks(d3.max(dataset, function(d) {
     return d3.max(d, function(d) {
       return d.y0 + d.y;
     });
-  }), height);
+  }), width);
 
-  var y = d3.scale.linear()
-    .domain([0, yTicks.endPoint])
-    .range([height, 0]);
+  var x = d3.scale.linear()
+    .domain([0, xTicks.endPoint])
+    .range([0, width]);
 
   var colors = [];
   var colorScale = getFacultyColors(true);
@@ -1016,8 +1006,6 @@ function updateUniversityGraph() {
   // Define and draw axes
   var yAxis = d3.svg.axis()
     .scale(y)
-    .ticks(yTicks.count)
-    .tickSize(-width, 0, 0)
     .orient("left")
     .tickFormat(function(d) {
       return d
@@ -1026,25 +1014,26 @@ function updateUniversityGraph() {
   var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom")
+    .ticks(xTicks.count)
+    .tickSize(-width, 0, 0)
     .tickFormat(function(d) {
       return d
     });
 
   svgUni.select(".y.axis")
     .call(yAxis)
-    .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("dy", "-6em")
-    .attr("dx", "-15em")
-    .style("text-anchor", "end")
-    .text("Students");
-
+    .selectAll("text")
+    .call(wrap, margin.left - 10, true)
+    .attr("dy", "-1.5em");
 
   svgUni.select(".x.axis")
     .call(xAxis)
-    .selectAll("text")
-    .call(wrap, x.rangeBand());
+    .append("text")
+    .attr("y", margin.bottom - 20)
+    .attr("x", (width / 2))
+    .style("text-anchor", "end")
+    .text("Students");
+
 
   // Create groups for each series, rects for each segment
   var groups = svgUni.selectAll("g.cost")
@@ -1053,9 +1042,9 @@ function updateUniversityGraph() {
   groups.exit().remove();
 
   groups.attr("class", "cost")
-  .style("fill", function(d, i) {
-    return colors[i].color;
-  });
+    .style("fill", function(d, i) {
+      return colors[i].color;
+    });
 
   groups.enter().append("g")
     .attr("class", "cost")
@@ -1072,29 +1061,29 @@ function updateUniversityGraph() {
     .remove();
 
   rect.attr("class", "rect")
-    .attr("x", function(d) {
-      return x(d.x);
-    })
     .attr("y", function(d) {
-      return y(d.y0 + d.y);
+      return y(d.x);
     })
-    .attr("height", function(d) {
-      return -y(d.y0 + d.y) + y(d.y0);
+    .attr("x", function(d) {
+      return x(d.y0);
     })
-    .attr("width", x.rangeBand());
+    .attr("width", function(d) {
+      return x(d.y0 + d.y) - x(d.y0);
+    })
+    .attr("height", y.rangeBand());
 
   rect.enter()
     .append("rect")
-    .attr("x", function(d) {
-      return x(d.x);
-    })
     .attr("y", function(d) {
-      return y(d.y0 + d.y);
+      return y(d.x);
     })
-    .attr("height", function(d) {
-      return -y(d.y0 + d.y) + y(d.y0);
+    .attr("x", function(d) {
+      return x(d.y0);
     })
-    .attr("width", x.rangeBand())
+    .attr("width", function(d) {
+      return x(d.y0 + d.y) - x(d.y0);
+    })
+    .attr("height", y.rangeBand())
     .on("mouseover", function(d) {
       tooltip.style("display", null);
     })
@@ -1856,26 +1845,50 @@ function getFacultiesShorterNames() {
   return shortFaculties;
 }
 
-function wrap(text, width) {
-  text.each(function() {
-    var text = d3.select(this),
-      words = text.text().split(/\s+/).reverse(),
-      word,
-      line = [],
-      lineNumber = 0,
-      lineHeight = 1.1, // ems
-      y = text.attr("y"),
-      dy = parseFloat(text.attr("dy")),
-      tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-    while (word = words.pop()) {
-      line.push(word);
-      tspan.text(line.join(" "));
-      if (tspan.node().getComputedTextLength() > width) {
-        line.pop();
+function wrap(text, width, vertical) {
+  if (vertical) {
+    text.each(function() {
+      var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1, // ems
+        x = text.attr("x"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("y",-10).attr("x", x).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
         tspan.text(line.join(" "));
-        line = [word];
-        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = text.append("tspan").attr("y", -10).attr("x", x).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
       }
-    }
-  });
+    });
+  } else {
+    text.each(function() {
+      var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
+      }
+    });
+  }
 }
