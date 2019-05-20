@@ -353,8 +353,9 @@ function getHeatmapRange(dataset) {
     }
   }
   for(i=0;i<5;i++){
-    var key = Math.round(i*max/5).toString() + "-" + Math.round((i+1)*max/5).toString()
-    range.push({key: key, value: paletteScale(Math.round(i*max/5))})
+    var maxRounded = getSmartTicks(max);
+    var key = Math.round(i*maxRounded.endPoint/5).toString() + "-" + Math.round((i+1)*maxRounded.endPoint/5).toString()
+    range.push({key: key, value: paletteScale(Math.round(i*maxRounded.endPoint/5))})
   }
   return range;
 }
@@ -932,11 +933,11 @@ function updateFacultyGraph() {
 function initializeUniversityGraph() {
   var margin = {
       top: 50,
-      right: 50,
+      right: 15,
       bottom: 50,
       left: 100
     },
-    width = (window.innerWidth - margin.left - margin.right) / 5,
+    width = (window.innerWidth - margin.left - margin.right) / 5 ,
     height = (window.innerHeight - margin.top - margin.bottom) / 3;
 
   svgUni = d3v5.select(".topUniversitiesGraph").append("svg")
@@ -951,12 +952,20 @@ function initializeUniversityGraph() {
   svgUni.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")");
+
+  // Graph title
+  svgUni.append("text")
+  .attr("class", "axis title")
+  .attr("x", (width / 2) + 30)
+  .attr("y", 0 - (margin.top / 2))
+  .attr("text-anchor", "end")
+  .text("Top 5 universiteiten");
 }
 
 function updateUniversityGraph() {
   var margin = {
       top: 50,
-      right: 50,
+      right: 15,
       bottom: 50,
       left: 100
     },
@@ -1027,14 +1036,10 @@ function updateUniversityGraph() {
       return d
     });
 
-  var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom")
+  var xAxis = d3v5.axisBottom(x)
     .ticks(xTicks.count)
-    .tickSize(-width, 0, 0)
-    .tickFormat(function(d) {
-      return d
-    });
+    .tickFormat(d3.format("d"));
+
 
   svgUni.select(".y.axis")
     .call(yAxis)
@@ -1045,10 +1050,11 @@ function updateUniversityGraph() {
   svgUni.select(".x.axis")
     .call(xAxis)
     .append("text")
+    .attr("class", "axis label")
     .attr("y", margin.bottom - 20)
     .attr("x", (width / 2))
     .style("text-anchor", "end")
-    .text("Students");
+    .text("Aantal studenten");
 
 
   // Create groups for each series, rects for each segment

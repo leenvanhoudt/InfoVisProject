@@ -93,7 +93,7 @@
     <button id="sidebarButton" class="openbtn" onclick="toggleSidebar()">></button>
   </div>
 
-  <div class="flex-row-container">    
+  <div class="flex-row-container" style="margin-left: 50px">    
     <div class="flex-column-container">
       <ul class="breadcrumb" id="breadcrumbs">
         <li id="worldBreadcrumb">Europa</li>
@@ -104,9 +104,9 @@
         <div id="container1" style="width: 600px; max-height: 600px; position: relative; "></div>
       </div>
 
-      <div class="flex-column-container">
-        <div id="container2" style="max-height: 250px; max-width: 250px; position: relative;"></div>
-        <div class="topUniversitiesGraph"></div>
+      <div class="flex-row-container" style="padding-top: 60px; align-items: center">
+        <div id="container2" style="max-height: 250px; max-width: 250px; position: relative"></div>
+        <div class="topUniversitiesGraph" style="margin-left: 10px"></div>
       </div>
     </div>
 
@@ -118,7 +118,7 @@
 
       <div style="display:flex; flex-direction: row">
         <div class="linegraph"></div>
-        <div id="container3" style="max-height: 70px; margin-left:-260px; margin-top: 100px; background-color: #eee; padding: 20px; padding-top: 5px">
+        <div id="container3" style="max-height: 70px; margin-left:-330px; margin-top: 200px; background-color: #eee; padding: 20px; padding-top: 5px; position: relative; z-index: 1;">
           <div style="display: flex; flex-direction: row;">
             <p class="text" >Gemiddeld&nbsp</p><p class="highlighted-text" id="yearlyCount"> </p><p class="text">&nbspstudenten per jaar</p>
           </div>
