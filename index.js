@@ -8,6 +8,7 @@ var countryTranslations = {};
 //selectedUniversity = object with all info about the selected university
 var selectedUniversity;
 var svg;
+var svgMap;
 var svgBar;
 var svgUni;
 var yearSelected;
@@ -89,6 +90,7 @@ function update() {
     dataset = makeDummySet(originalData);
   }
   overviewMap.updateChoropleth(dataset);
+  updateHeatmapLegend(dataset);
 
   if (view == 'country' || view == 'university') {
     zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
@@ -246,6 +248,84 @@ function initializeMaps(dataset) {
       }
     }
   });
+
+  svgMap = d3v5.select(".container1").append("svg")
+  // Legend
+  svgMap.append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) {
+      return "translate(40," + i * 19 + ")";
+    });
+  console.log(dataset);
+}
+
+function updateHeatmapLegend(dataset) {
+  var data = getHeatmapRange(dataset);
+  var legend = svg.select("g.legend");
+
+  var rect = legend.selectAll(".legend.rect")
+    .data(data);
+
+  var text = legend.selectAll(".legend.text")
+    .data(data);
+
+  rect.exit()
+    .attr("class", "legend rect")
+    .remove()
+
+  text.exit()
+    .attr("class", "legend text")
+    .remove()
+
+  rect.attr("class", "legend rect")
+    .attr("x", width - 18)
+    .attr("y", function(d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      return d.value;
+    });
+
+  text.attr("class", "legend text")
+    .attr("x", width + 5)
+    .attr("y", function(d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
+    });
+
+  rect.enter().append("rect")
+    .attr("class", "legend rect")
+    .attr("x", width - 18)
+    .attr("y", function(d, i) {
+      return i * 20;
+    })
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", function(d) {
+      return d.value;
+    });
+
+  text.enter().append("text")
+    .attr("class", "legend text")
+    .attr("x", width + 5)
+    .attr("y", function(d, i) {
+      return i * 20 + 9;
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "start")
+    .text(function(d) {
+      return d.key;
+    });
+}
+
+function getHeatmapRange() {
+
 }
 
 function initializeStudentCountGraph() {
@@ -437,6 +517,7 @@ function updateLines(data, x, y) {
 }
 
 function updateLegend(data, width) {
+  console.log(data);
   var legend = svg.select("g.legend");
 
   var rect = legend.selectAll(".legend.rect")
@@ -827,7 +908,7 @@ function initializeUniversityGraph() {
     width = (window.innerWidth - margin.left - margin.right) / 5,
     height = (window.innerHeight - margin.top - margin.bottom) / 4;
 
-  svgUni = d3v5.select(".universitygraph").append("svg")
+  svgUni = d3v5.select(".topUniversitiesGraph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
