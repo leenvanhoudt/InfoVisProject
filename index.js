@@ -819,10 +819,10 @@ function updateFacultyGraph() {
 
 function initializeUniversityGraph() {
   var margin = {
-      top: 20,
-      right: 100,
-      bottom: 200,
-      left: 100
+      top: 50,
+      right: 50,
+      bottom: 100,
+      left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
     height = (window.innerHeight - margin.top - margin.bottom) / 4;
@@ -843,10 +843,10 @@ function initializeUniversityGraph() {
 
 function updateUniversityGraph() {
   var margin = {
-      top: 20,
-      right: 100,
-      bottom: 200,
-      left: 100
+      top: 50,
+      right: 50,
+      bottom: 100,
+      left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
     height = (window.innerHeight - margin.top - margin.bottom) / 4;
@@ -894,10 +894,17 @@ function updateUniversityGraph() {
   var colors = [];
   var colorScale = getFacultyColors(true);
   getAllFaculties(true).forEach(function(faculty, i) {
-    colors.push({
-      "faculty": faculty,
-      "color": colorScale(faculty)
-    })
+    if (allFacultiesSelected) {
+      colors.push({
+        "faculty": "Totaal",
+        "color": colorScale("Totaal")
+      })
+    } else {
+      colors.push({
+        "faculty": faculty,
+        "color": colorScale(faculty)
+      })
+    }
   });
 
   // Define and draw axes
@@ -938,6 +945,11 @@ function updateUniversityGraph() {
     .data(dataset);
 
   groups.exit().remove();
+
+  groups.attr("class", "cost")
+  .style("fill", function(d, i) {
+    return colors[i].color;
+  });
 
   groups.enter().append("g")
     .attr("class", "cost")
@@ -993,32 +1005,6 @@ function updateUniversityGraph() {
   var t = d3v5.transition()
     .duration(750);
   rect.transition(t);
-
-
-  var legend = svgUni.selectAll(".legend")
-    .data(colors)
-    .enter().append("g")
-    .attr("class", "legend")
-    .attr("transform", function(d, i) {
-      return "translate(30," + i * 19 + ")";
-    });
-
-  legend.append("rect")
-    .attr("x", width - 18)
-    .attr("width", 18)
-    .attr("height", 18)
-    .style("fill", function(d) {
-      return d.color;
-    });
-
-  legend.append("text")
-    .attr("x", width + 5)
-    .attr("y", 9)
-    .attr("dy", ".35em")
-    .style("text-anchor", "start")
-    .text(function(d, i) {
-      return d.faculty;
-    });
 
   // Prep the tooltip bits, initial display is hidden
   var tooltip = svgUni.append("g")
