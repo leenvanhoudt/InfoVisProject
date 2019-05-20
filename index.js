@@ -12,6 +12,7 @@ var svgMap;
 var svgBar;
 var svgUni;
 var yearSelected;
+var paletteScale;
 //view = 'world', 'country' or 'university'
 var view = 'world';
 var sidebarVisible = false;
@@ -90,7 +91,7 @@ function update() {
     dataset = makeDummySet(originalData);
   }
   overviewMap.updateChoropleth(dataset);
-  //updateHeatmapLegend(dataset);
+  updateHeatmapLegend(dataset);
 
   if (view == 'country' || view == 'university') {
     zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
@@ -131,7 +132,7 @@ function makeDataset(data) {
   var studentValues = Object.keys(studentCountPerCountry).map(function(key) {
     return studentCountPerCountry[key]
   });
-  var paletteScale = buildPaletteScale(studentValues);
+  paletteScale = buildPaletteScale(studentValues);
 
   var dataset = {};
   var countries = Datamap.prototype.worldTopo.objects.world.geometries;
@@ -194,7 +195,7 @@ function initializeMaps(dataset) {
     //set projection to Europe
     setProjection: function(element, options) {
       var projection = d3.geo.mercator()
-        .center([10, 50])
+        .center([8, 50])
         .scale(600)
         .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
       var path = d3.geo.path()
@@ -249,19 +250,33 @@ function initializeMaps(dataset) {
     }
   });
 
-  svgMap = d3v5.select(".container1").append("svg")
+  width = 30,
+  height = 200;
+
+  svgMap = d3v5.select(".heatmap-legend").append("svg")
+    .attr("width", width + 100)
+    .attr("height", height)
+    .append("g");
+  
   // Legend
   svgMap.append("g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) {
-      return "translate(40," + i * 19 + ")";
-    });
-  console.log(dataset);
+    .attr("transform", "translate(" + 0 + "," + 30 + ")");
+
+  svgMap.append("text")
+    .attr("class", "axis label")
+    .attr("x", width-25)
+    .attr("y", height-180)
+    .text("Aantal studenten");
+
+  updateHeatmapLegend(dataset);
 }
 
 function updateHeatmapLegend(dataset) {
   var data = getHeatmapRange(dataset);
-  var legend = svg.select("g.legend");
+  var width = 30;
+  var legend = svgMap.select("g.legend");
+  console.log(data);
 
   var rect = legend.selectAll(".legend.rect")
     .data(data);
@@ -325,22 +340,23 @@ function updateHeatmapLegend(dataset) {
 }
 
 function getHeatmapRange(dataset) {
-  range = {};
+  range = [];
   var max = 0;
-  var maxCountry;
   var min = 2000;
-  var minCountry;
   for(country in dataset){
     if(country!='BEL'){
       if(dataset[country].numberOfStudents>max){
-        maxCountry = dataset[country];
         max = dataset[country].numberOfStudents
       }else if(dataset[country].numberOfStudents<min){
-        minCountry = dataset[country];
         min = dataset[country].numberOfStudents;
       }
     }
   }
+  for(i=0;i<5;i++){
+    var key = Math.round(i*max/5).toString() + "-" + Math.round((i+1)*max/5).toString()
+    range.push({key: key, value: paletteScale(Math.round(i*max/5))})
+  }
+  return range;
 }
 
 function initializeStudentCountGraph() {
@@ -916,13 +932,8 @@ function updateFacultyGraph() {
 function initializeUniversityGraph() {
   var margin = {
       top: 50,
-<<<<<<< HEAD
-      right: 50,
-      bottom: 100,
-=======
       right: 200,
       bottom: 50,
->>>>>>> 23d375710c3b48440365de94b05b4c10a723ea02
       left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
@@ -945,13 +956,8 @@ function initializeUniversityGraph() {
 function updateUniversityGraph() {
   var margin = {
       top: 50,
-<<<<<<< HEAD
-      right: 50,
-      bottom: 100,
-=======
       right: 100,
       bottom: 50,
->>>>>>> 23d375710c3b48440365de94b05b4c10a723ea02
       left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
