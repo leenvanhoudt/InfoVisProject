@@ -90,7 +90,7 @@ function update() {
     dataset = makeDummySet(originalData);
   }
   overviewMap.updateChoropleth(dataset);
-  updateHeatmapLegend(dataset);
+  //updateHeatmapLegend(dataset);
 
   if (view == 'country' || view == 'university') {
     zoomToCountry(selectedCountry, selectedCountryCoordinates, dataset);
@@ -324,8 +324,23 @@ function updateHeatmapLegend(dataset) {
     });
 }
 
-function getHeatmapRange() {
-
+function getHeatmapRange(dataset) {
+  range = {};
+  var max = 0;
+  var maxCountry;
+  var min = 2000;
+  var minCountry;
+  for(country in dataset){
+    if(country!='BEL'){
+      if(dataset[country].numberOfStudents>max){
+        maxCountry = dataset[country];
+        max = dataset[country].numberOfStudents
+      }else if(dataset[country].numberOfStudents<min){
+        minCountry = dataset[country];
+        min = dataset[country].numberOfStudents;
+      }
+    }
+  }
 }
 
 function initializeStudentCountGraph() {
@@ -900,10 +915,10 @@ function updateFacultyGraph() {
 
 function initializeUniversityGraph() {
   var margin = {
-      top: 20,
-      right: 100,
-      bottom: 200,
-      left: 100
+      top: 50,
+      right: 200,
+      bottom: 50,
+      left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
     height = (window.innerHeight - margin.top - margin.bottom) / 4;
@@ -924,10 +939,10 @@ function initializeUniversityGraph() {
 
 function updateUniversityGraph() {
   var margin = {
-      top: 20,
+      top: 50,
       right: 100,
-      bottom: 200,
-      left: 100
+      bottom: 50,
+      left: 50
     },
     width = (window.innerWidth - margin.left - margin.right) / 5,
     height = (window.innerHeight - margin.top - margin.bottom) / 4;
